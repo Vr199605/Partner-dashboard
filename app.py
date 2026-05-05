@@ -42,7 +42,7 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor="#667eea", icone="ðŸ“
         <div>{subtitulo}</div>
     </div>
     """
-    class PDFDashboardGenerator:
+class PDFDashboardGenerator:
 
     def __init__(self):
         self.styles = getSampleStyleSheet()
@@ -63,8 +63,6 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor="#667eea", icone="ðŸ“
             ('BACKGROUND', (0,0), (-1,0), HexColor('#667eea')),
             ('TEXTCOLOR', (0,0), (-1,0), colors.white),
             ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
-
-            # MELHORIA VISUAL
             ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, HexColor('#f4f6fb')]),
         ]))
 
@@ -72,6 +70,22 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor="#667eea", icone="ðŸ“
 
     def generate(self):
         buffer = io.BytesIO()
+
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=landscape(A4)
+        )
+
+        elements = []
+
+        elements.append(Paragraph("ASSERTIF CORRETORA - DASHBOARD", self.styles['Title']))
+        elements.append(Spacer(1, 20))
+        elements.append(self._create_resumo())
+
+        doc.build(elements)
+        buffer.seek(0)
+
+        return buffer.getvalue()
 
         # âœ… PDF HORIZONTAL
         doc = SimpleDocTemplate(
