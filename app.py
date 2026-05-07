@@ -114,18 +114,20 @@ class PDFDashboardGenerator:
         self.filename = filename
         self.styles = getSampleStyleSheet()
         self._setup_custom_styles()
-        
+    
     def _setup_custom_styles(self):
         """Configura estilos customizados para o PDF"""
+        
         # Estilo do título principal
         self.styles.add(ParagraphStyle(
             name='MainTitle',
             parent=self.styles['Heading1'],
-            fontSize=28,
+            fontSize=32,
             textColor=colors.white,
             alignment=TA_CENTER,
-            spaceAfter=10,
-            fontName='Helvetica-Bold'
+            spaceAfter=15,
+            fontName='Helvetica-Bold',
+            leading=38
         ))
         
         # Estilo do subtítulo
@@ -136,7 +138,8 @@ class PDFDashboardGenerator:
             textColor=colors.white,
             alignment=TA_CENTER,
             spaceAfter=20,
-            fontName='Helvetica'
+            fontName='Helvetica',
+            leading=18
         ))
         
         # Estilo de seção
@@ -183,8 +186,7 @@ class PDFDashboardGenerator:
         ))
     
     def _create_header_table(self):
-        """Cria o cabeçalho do dashboard"""
-        # Criar tabela com fundo colorido para simular gradiente
+        """Cria o cabeçalho do dashboard com visual premium"""
         header_data = [
             [Paragraph("📊 ASSERTIF CORRETORA", self.styles['MainTitle'])],
             [Paragraph("Dashboard Financeiro Premium | YTD 2026", self.styles['SubTitle'])],
@@ -196,18 +198,16 @@ class PDFDashboardGenerator:
             ('BACKGROUND', (0, 0), (-1, -1), HexColor('#667eea')),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, 0), 30),
-            ('BOTTOMPADDING', (0, -1), (-1, -1), 30),
-            ('LEFTPADDING', (0, 0), (-1, -1), 20),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 20),
-            ('ROUNDEDCORNERS', [15, 15, 15, 15]),
+            ('TOPPADDING', (0, 0), (-1, 0), 35),
+            ('BOTTOMPADDING', (0, -1), (-1, -1), 35),
+            ('LEFTPADDING', (0, 0), (-1, -1), 25),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 25),
         ]))
         
         return header_table
     
     def _create_kpi_table(self, kpis):
-        """Cria tabela de KPIs"""
-        # kpis = lista de dicts com: titulo, valor, subtitulo, cor
+        """Cria tabela de KPIs com visual aprimorado"""
         kpi_data = []
         row = []
         
@@ -216,7 +216,7 @@ class PDFDashboardGenerator:
             <para align="center">
             <font size="24">{kpi.get('icone', '📊')}</font><br/>
             <font size="9" color="white"><b>{kpi['titulo']}</b></font><br/>
-            <font size="16" color="white"><b>{kpi['valor']}</b></font><br/>
+            <font size="18" color="white"><b>{kpi['valor']}</b></font><br/>
             <font size="8" color="white">{kpi.get('subtitulo', '')}</font>
             </para>
             """
@@ -235,7 +235,7 @@ class PDFDashboardGenerator:
         # Aplicar cores diferentes para cada KPI
         cores_kpi = [
             HexColor('#667eea'),  # Primária
-            HexColor('#28a745'),  # Sucesso
+            HexColor('#dc3545'),  # Despesas (vermelho)
             HexColor('#17a2b8'),  # Info
             HexColor('#764ba2'),  # Secundária
         ]
@@ -243,10 +243,10 @@ class PDFDashboardGenerator:
         style_commands = [
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 15),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
-            ('LEFTPADDING', (0, 0), (-1, -1), 10),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 18),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 18),
+            ('LEFTPADDING', (0, 0), (-1, -1), 12),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
         ]
         
         for i in range(min(4, len(kpis))):
@@ -257,23 +257,24 @@ class PDFDashboardGenerator:
         return kpi_table
     
     def _create_section_header(self, titulo, cor=HexColor('#667eea')):
-        """Cria cabeçalho de seção"""
+        """Cria cabeçalho de seção com visual premium"""
         section_data = [[Paragraph(f"<font color='white'><b>{titulo}</b></font>", self.styles['Normal'])]]
+        
         section_table = Table(section_data, colWidths=[18*cm])
         section_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), cor),
             ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 12),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
-            ('LEFTPADDING', (0, 0), (-1, -1), 20),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+            ('TOPPADDING', (0, 0), (-1, -1), 14),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 14),
+            ('LEFTPADDING', (0, 0), (-1, -1), 25),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 25),
         ]))
+        
         return section_table
     
     def _create_data_table(self, headers, data, col_widths=None):
-        """Cria tabela de dados formatada"""
-        # Preparar dados da tabela
+        """Cria tabela de dados formatada com visual aprimorado"""
         table_data = [headers] + data
         
         if col_widths is None:
@@ -286,16 +287,16 @@ class PDFDashboardGenerator:
             ('BACKGROUND', (0, 0), (-1, 0), HexColor('#667eea')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('FONTSIZE', (0, 0), (-1, 0), 11),
             ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 8),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-            ('LEFTPADDING', (0, 0), (-1, -1), 10),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LEFTPADDING', (0, 0), (-1, -1), 12),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
             # Corpo
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
             ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#e8e8e8')),
         ]
         
@@ -311,7 +312,7 @@ class PDFDashboardGenerator:
         return table
     
     def _create_ranking_card(self, posicao, nome, valor, detalhes=""):
-        """Cria card de ranking"""
+        """Cria card de ranking com visual premium"""
         medalhas = ['🥇', '🥈', '🥉']
         cores_medalha = [HexColor('#FFD700'), HexColor('#C0C0C0'), HexColor('#CD7F32')]
         
@@ -319,30 +320,31 @@ class PDFDashboardGenerator:
         cor = cores_medalha[posicao - 1] if posicao <= 3 else HexColor('#6c757d')
         
         card_data = [[
-            Paragraph(f"<font size='20'>{medalha}</font>", self.styles['Normal']),
-            Paragraph(f"<b>{nome}</b><br/><font size='14' color='#28a745'><b>{valor}</b></font><br/><font size='8' color='#6c757d'>{detalhes}</font>", self.styles['Normal'])
+            Paragraph(f"<font size='24'>{medalha}</font>", self.styles['Normal']),
+            Paragraph(f"<b>{nome}</b><br/><font size='16' color='#28a745'><b>{valor}</b></font><br/><font size='9' color='#6c757d'>{detalhes}</font>", self.styles['Normal'])
         ]]
         
-        card_table = Table(card_data, colWidths=[2*cm, 16*cm])
+        card_table = Table(card_data, colWidths=[2.5*cm, 15.5*cm])
         card_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), colors.white),
             ('ALIGN', (0, 0), (0, 0), 'CENTER'),
             ('ALIGN', (1, 0), (1, 0), 'LEFT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 15),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
-            ('LEFTPADDING', (0, 0), (-1, -1), 15),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
-            ('BOX', (0, 0), (-1, -1), 2, cor),
+            ('TOPPADDING', (0, 0), (-1, -1), 18),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 18),
+            ('LEFTPADDING', (0, 0), (-1, -1), 18),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 18),
+            ('BOX', (0, 0), (-1, -1), 3, cor),
         ]))
         
         return card_table
     
     def _create_resumo_executivo_table(self):
-        """Cria tabela do resumo executivo"""
+        """Cria tabela do resumo executivo LIMPA - sem as linhas removidas"""
         data = [
             ['INDICADOR', 'VALOR'],
             ['💰 RECEITA BRUTA TOTAL (P. MAAS + DIRETO)', 'R$ 180.797,00'],
+            ['', ''],
             ['📦 PRODUÇÃO DIRETA', ''],
             ['    Receita Bruta', 'R$ 180.522,00'],
             ['    Impostos Diretos', '(R$ 31.465,00)'],
@@ -353,77 +355,77 @@ class PDFDashboardGenerator:
             ['    Despesas', '(R$ 29.104,00)'],
             ['    Folha + Terceiros', '(R$ 16.946,00)'],
             ['EBITDA Societário', 'R$ 37.608,00'],
+            ['', ''],
             ['🌐 PORTAL MAAS', ''],
             ['    Receita Bruta', 'R$ 275,00'],
             ['    Impostos Diretos', '(R$ 54,00)'],
             ['    Custo Operacional (D.A)', '(R$ 22,00)'],
             ['(=) Margem de Contribuição', 'R$ 199,00'],
             ['EBITDA Societário', 'R$ 199,00'],
+            ['', ''],
             ['🎯 RESULTADO OPERACIONAL TOTAL', 'R$ 37.807,00'],
+            ['', ''],
             ['📊 DISTRIBUIÇÃO DO RESULTADO', ''],
-            ['    Resultado Operacional - Distribuição', 'R$ 26.949,00'],
-            ['    → Sócio Partner (65%)', 'R$ 19.169,00'],
-            ['    → Sócio Maldivas (35%)', 'R$ 7.780,00'],
-            ['    Valor devido pelo Portal Maas (Globus)', 'R$ 199,00'],
-            ['    Valor devido para a Globus – D.A', 'R$ 14.207,00'],
-            ['Valor a pagar para a Maldivas', 'R$ 21.787,00'],
-            ['📅 RESULTADO TRIMESTRAL - Valor a Receber (Maldivas)', ''],
-            ['    1º Trimestre', 'R$ 20.439,00'],
-            ['    2º Trimestre', 'R$ 1.349,00'],
-            ['    3º Trimestre', 'R$ 0,00'],
-            ['    4º Trimestre', 'R$ 0,00'],
+            ['    Resultado Operacional - Distribuição', 'R$ 35.266,00'],
+            ['    → Sócio Partner (65%)', 'R$ 24.575,00'],
+            ['    → Sócio Maldivas (35%)', 'R$ 10.691,00'],
         ]
         
         table = Table(data, colWidths=[12*cm, 6*cm])
         
         style_commands = [
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 11),
+            ('FONTSIZE', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 0), (-1, 0), HexColor('#667eea')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('ALIGN', (0, 0), (0, -1), 'LEFT'),
             ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 6),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-            ('LEFTPADDING', (0, 0), (-1, -1), 10),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+            ('LEFTPADDING', (0, 0), (-1, -1), 12),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 12),
             ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#e8e8e8')),
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('FONTSIZE', (0, 1), (-1, -1), 10),
         ]
         
-        # Destacar linhas específicas
+        # Linhas de destaque (ajustadas para a nova estrutura)
         linhas_destaque = {
             1: HexColor('#e8f5e9'),   # Receita bruta total
-            8: HexColor('#c8e6c9'),   # Margem de contribuição
-            11: HexColor('#bbdefb'),  # EBITDA
-            16: HexColor('#c8e6c9'),  # Margem contribuição Portal
-            17: HexColor('#bbdefb'),  # EBITDA Portal
-            18: HexColor('#a5d6a7'),  # Resultado operacional total
-            25: HexColor('#ffccbc'),  # Valor a pagar Maldivas
+            9: HexColor('#c8e6c9'),   # Margem de contribuição
+            12: HexColor('#bbdefb'),  # EBITDA
+            18: HexColor('#c8e6c9'),  # Margem contribuição Portal
+            19: HexColor('#bbdefb'),  # EBITDA Portal
+            21: HexColor('#a5d6a7'),  # Resultado operacional total
+            24: HexColor('#e3f2fd'),  # Resultado distribuição
+            25: HexColor('#e8f5e9'),  # Partner
+            26: HexColor('#e8f5e9'),  # Maldivas
         }
         
         for linha, cor in linhas_destaque.items():
-            style_commands.append(('BACKGROUND', (0, linha), (-1, linha), cor))
-            style_commands.append(('FONTNAME', (0, linha), (-1, linha), 'Helvetica-Bold'))
+            if linha < len(data):
+                style_commands.append(('BACKGROUND', (0, linha), (-1, linha), cor))
+                style_commands.append(('FONTNAME', (0, linha), (-1, linha), 'Helvetica-Bold'))
         
         # Colorir valores negativos
-        linhas_negativas = [4, 5, 7, 9, 10, 14, 15]
+        linhas_negativas = [5, 6, 8, 10, 11, 16, 17]
         for linha in linhas_negativas:
-            style_commands.append(('TEXTCOLOR', (1, linha), (1, linha), HexColor('#dc3545')))
+            if linha < len(data):
+                style_commands.append(('TEXTCOLOR', (1, linha), (1, linha), HexColor('#dc3545')))
         
         # Colorir valores positivos
-        linhas_positivas = [1, 3, 6, 8, 11, 13, 16, 17, 18, 21, 22, 27, 28]
+        linhas_positivas = [1, 4, 7, 9, 12, 15, 18, 19, 21, 24, 25, 26]
         for linha in linhas_positivas:
-            style_commands.append(('TEXTCOLOR', (1, linha), (1, linha), HexColor('#28a745')))
+            if linha < len(data):
+                style_commands.append(('TEXTCOLOR', (1, linha), (1, linha), HexColor('#28a745')))
         
         table.setStyle(TableStyle(style_commands))
         
         return table
     
     def _create_footer(self):
-        """Cria rodapé do documento"""
+        """Cria rodapé do documento com visual premium"""
         footer_data = [[
             Paragraph(
                 "<font color='white'><b>✅ ASSERTIF CORRETORA - Dashboard Financeiro Premium</b><br/>"
@@ -432,9 +434,10 @@ class PDFDashboardGenerator:
                 ParagraphStyle(
                     name='FooterStyle',
                     parent=self.styles['Normal'],
-                    fontSize=10,
+                    fontSize=11,
                     textColor=colors.white,
                     alignment=TA_CENTER,
+                    leading=16
                 )
             )
         ]]
@@ -444,19 +447,20 @@ class PDFDashboardGenerator:
             ('BACKGROUND', (0, 0), (-1, -1), HexColor('#1E3A5F')),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('TOPPADDING', (0, 0), (-1, -1), 25),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), 25),
-            ('LEFTPADDING', (0, 0), (-1, -1), 20),
-            ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+            ('TOPPADDING', (0, 0), (-1, -1), 30),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 30),
+            ('LEFTPADDING', (0, 0), (-1, -1), 25),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 25),
         ]))
         
         return footer_table
     
-    def generate_pdf(self, df_receitas_clean=None, df_despesas_clean=None, df_seg=None, 
-                     df_prod=None, df_orig=None, df_cli=None, df_cat=None):
+    def generate_pdf(self, df_receitas_clean=None, df_despesas_clean=None, 
+                     df_seg=None, df_prod=None, df_orig=None, df_cli=None, df_cat=None):
         """Gera o PDF completo do dashboard"""
         
         buffer = io.BytesIO()
+        
         doc = SimpleDocTemplate(
             buffer,
             pagesize=A4,
@@ -470,53 +474,53 @@ class PDFDashboardGenerator:
         
         # HEADER
         elements.append(self._create_header_table())
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 25))
         
-        # KPIs PRINCIPAIS
+        # KPIs PRINCIPAIS - ALTERADO: Despesas no lugar de Lucro Líquido
         elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs) YTD"))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         kpis = [
             {'titulo': 'FATURAMENTO YTD', 'valor': 'R$ 180.797', 'subtitulo': 'Jan - Abr 2026', 'icone': '💰'},
-            {'titulo': 'LUCRO LÍQUIDO', 'valor': 'R$ 37.807', 'subtitulo': '+21% Margem', 'icone': '📈'},
+            {'titulo': 'DESPESAS', 'valor': 'R$ 29.104', 'subtitulo': 'Total de Despesas', 'icone': '💸'},
             {'titulo': 'MARGEM DE LUCRO', 'valor': '21%', 'subtitulo': 'Status: LUCRO', 'icone': '📊'},
             {'titulo': 'EBITDA', 'valor': 'R$ 37.807', 'subtitulo': 'Resultado Operacional', 'icone': '🎯'},
         ]
         elements.append(self._create_kpi_table(kpis))
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 25))
         
         # EVOLUÇÃO MENSAL
         elements.append(self._create_section_header("📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO", HexColor('#28a745')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         evolucao_headers = ['Mês', 'Receita Bruta', 'Crescimento', 'Resultado Operacional']
         evolucao_data = [
             ['Janeiro', 'R$ 42.263', '-', 'R$ 5.133'],
             ['Fevereiro', 'R$ 49.513', '+17,2%', 'R$ 7.667'],
             ['Março', 'R$ 71.946', '+45,3%', 'R$ 16.690'],
-            ['Abril', 'R$ 17.075', '-76,3%', 'R$ 0'],
+            ['Abril', 'R$ 17.075', '-76,3%', 'R$ 8.317'],
         ]
-        elements.append(self._create_data_table(evolucao_headers, evolucao_data, [4*cm, 5*cm, 4*cm, 5*cm]))
-        elements.append(Spacer(1, 20))
+        elements.append(self._create_data_table(evolucao_headers, evolucao_data, [4.5*cm, 4.5*cm, 4.5*cm, 4.5*cm]))
+        elements.append(Spacer(1, 25))
         
         # DISTRIBUIÇÃO ENTRE SÓCIOS
         elements.append(self._create_section_header("🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS", HexColor('#6f42c1')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         dist_headers = ['Mês', 'Partner (65%)', 'Maldivas (35%)']
         dist_data = [
             ['Janeiro', 'R$ 3.336', 'R$ 986'],
             ['Fevereiro', 'R$ 4.984', 'R$ 1.818'],
             ['Março', 'R$ 10.849', 'R$ 4.976'],
-            ['Abril', 'R$ 0', 'R$ 0'],
-            ['TOTAL YTD', 'R$ 19.169', 'R$ 7.780'],
+            ['Abril', 'R$ 5.406', 'R$ 2.911'],
+            ['TOTAL YTD', 'R$ 24.575', 'R$ 10.691'],
         ]
         elements.append(self._create_data_table(dist_headers, dist_data, [6*cm, 6*cm, 6*cm]))
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 25))
         
         # TOP ORIGINADORES
         elements.append(self._create_section_header("👥 RANKING - TOP ORIGINADORES", HexColor('#17a2b8')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         if df_orig is not None and len(df_orig) > 0:
             for i, (_, row) in enumerate(df_orig.head(3).iterrows()):
@@ -526,9 +530,8 @@ class PDFDashboardGenerator:
                     formatar_moeda(row['Total']),
                     f"{int(row['Operações'])} operações | Ticket médio: {formatar_moeda(row['Ticket Médio'])}"
                 ))
-                elements.append(Spacer(1, 8))
+                elements.append(Spacer(1, 10))
         else:
-            # Dados padrão se não houver dados processados
             originadores_default = [
                 ('JOSE GUILHERME SABINO', 107842.67, '58 operações | Ticket médio: R$ 1.859,70'),
                 ('JOAO GABRIEL RIBEIRO', 29119.17, 'Segundo maior volume'),
@@ -536,13 +539,13 @@ class PDFDashboardGenerator:
             ]
             for i, (nome, valor, detalhe) in enumerate(originadores_default):
                 elements.append(self._create_ranking_card(i + 1, nome, formatar_moeda(valor), detalhe))
-                elements.append(Spacer(1, 8))
+                elements.append(Spacer(1, 10))
         
         elements.append(PageBreak())
         
         # TOP SEGURADORAS
         elements.append(self._create_section_header("🏆 RANKING - MAIORES COMISSÕES POR SEGURADORA", HexColor('#764ba2')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         if df_seg is not None and len(df_seg) > 0:
             seg_headers = ['Ranking', 'Seguradora', 'Comissão Total', '% do Total']
@@ -555,12 +558,11 @@ class PDFDashboardGenerator:
                     f"{row['% do Total']:.1f}%"
                 ])
             elements.append(self._create_data_table(seg_headers, seg_data, [2*cm, 8*cm, 5*cm, 3*cm]))
-        
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 25))
         
         # TOP CLIENTES
         elements.append(self._create_section_header("🏅 RANKING - MAIORES CLIENTES POR RECEITA", HexColor('#20c997')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         if df_cli is not None and len(df_cli) > 0:
             cli_headers = ['Ranking', 'Cliente', 'Receita Total', '% do Total']
@@ -574,12 +576,11 @@ class PDFDashboardGenerator:
                     f"{row['% do Total']:.1f}%"
                 ])
             elements.append(self._create_data_table(cli_headers, cli_data, [2*cm, 8*cm, 5*cm, 3*cm]))
-        
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 25))
         
         # ANÁLISE POR PRODUTO
         elements.append(self._create_section_header("📦 ANÁLISE POR TIPO DE PRODUTO", HexColor('#fd7e14')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         if df_prod is not None and len(df_prod) > 0:
             prod_headers = ['Produto', 'Comissão Total', '% do Total', 'Qtd Operações']
@@ -592,12 +593,11 @@ class PDFDashboardGenerator:
                     str(int(row['Qtd']))
                 ])
             elements.append(self._create_data_table(prod_headers, prod_data, [6*cm, 5*cm, 4*cm, 3*cm]))
-        
-        elements.append(Spacer(1, 20))
+        elements.append(Spacer(1, 25))
         
         # DESPESAS
         elements.append(self._create_section_header("💸 RANKING - MAIORES DESPESAS", HexColor('#dc3545')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         
         if df_cat is not None and len(df_cat) > 0:
             desp_headers = ['Categoria', 'Valor Total', '% do Total']
@@ -614,19 +614,18 @@ class PDFDashboardGenerator:
         
         # RESUMO EXECUTIVO
         elements.append(self._create_section_header("📋 RESUMO EXECUTIVO - YTD 2026", HexColor('#1E3A5F')))
-        elements.append(Spacer(1, 10))
+        elements.append(Spacer(1, 12))
         elements.append(self._create_resumo_executivo_table())
-        elements.append(Spacer(1, 30))
+        elements.append(Spacer(1, 35))
         
         # FOOTER
         elements.append(self._create_footer())
         
         # Build PDF
         doc.build(elements)
-        
         buffer.seek(0)
+        
         return buffer.getvalue()
-
 
 # =============================================================================
 # 🎯 APLICAÇÃO STREAMLIT PRINCIPAL
@@ -701,7 +700,6 @@ def main():
         
         st.markdown("---")
         st.header("⚙️ Configurações")
-        
         show_tables = st.checkbox("Mostrar tabelas detalhadas", value=True)
         show_charts = st.checkbox("Mostrar gráficos", value=True)
     
@@ -717,7 +715,6 @@ def main():
     if uploaded_file is not None:
         # Carregar dados
         dados = pd.read_excel(uploaded_file, sheet_name=None)
-        
         st.sidebar.success(f"✅ Arquivo carregado!")
         st.sidebar.info(f"📑 Abas: {list(dados.keys())}")
         
@@ -733,7 +730,6 @@ def main():
         if len(df_receitas) > 0:
             df_receitas.columns = df_receitas.columns.str.strip()
             df_receitas_clean = df_receitas.dropna(subset=[df_receitas.columns[12]])
-            
             col_comissao = df_receitas.columns[12]
             df_receitas_clean[col_comissao] = pd.to_numeric(
                 df_receitas_clean[col_comissao].astype(str).str.replace(',', '.').str.replace(' ', ''),
@@ -775,7 +771,6 @@ def main():
             df_despesas_clean = df_despesas.dropna(how='all')
             col_valor_desp = df_despesas.columns[4]
             col_categoria = df_despesas.columns[5]
-            
             df_despesas_clean[col_valor_desp] = pd.to_numeric(
                 df_despesas_clean[col_valor_desp].astype(str).str.replace(',', '.').str.replace(' ', ''),
                 errors='coerce'
@@ -788,7 +783,7 @@ def main():
             df_cat['% do Total'] = (df_cat['Total'] / df_cat['Total'].sum() * 100).round(1)
     
     # =============================================================================
-    # 💰 SEÇÃO 1: KPIs PRINCIPAIS YTD
+    # 💰 SEÇÃO 1: KPIs PRINCIPAIS YTD - ALTERADO: Despesas no lugar de Lucro Líquido
     # =============================================================================
     
     st.markdown("""
@@ -799,7 +794,7 @@ def main():
     
     # KPIs
     faturamento_ytd = 180797
-    lucro_liquido = 37807
+    despesas_total = 29104
     margem = 21
     ebitda = 37807
     
@@ -809,7 +804,7 @@ def main():
         st.markdown(criar_cartao_kpi_html("FATURAMENTO YTD", formatar_moeda(faturamento_ytd), "Jan - Abr 2026", "#667eea", "💰"), unsafe_allow_html=True)
     
     with col2:
-        st.markdown(criar_cartao_kpi_html("LUCRO LÍQUIDO", formatar_moeda(lucro_liquido), "+21% Margem", "#28a745", "📈"), unsafe_allow_html=True)
+        st.markdown(criar_cartao_kpi_html("DESPESAS", formatar_moeda(despesas_total), "Total de Despesas", "#dc3545", "💸"), unsafe_allow_html=True)
     
     with col3:
         st.markdown(criar_cartao_kpi_html("MARGEM DE LUCRO", "21%", "Status: LUCRO", "#17a2b8", "📊"), unsafe_allow_html=True)
@@ -830,7 +825,7 @@ def main():
         
         meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril']
         receita_bruta = [42263, 49513, 71946, 17075]
-        resultado_op = [5133, 7667, 16690, 0]
+        resultado_op = [5133, 7667, 16690, 8317]
         crescimento = [0, 17.2, 45.3, -76.3]
         
         fig_evolucao = make_subplots(
@@ -875,7 +870,6 @@ def main():
             ),
             row=1, col=2
         )
-        
         fig_evolucao.add_hline(y=0, line_dash="dash", line_color="#dc3545", line_width=2, row=1, col=2)
         
         # Gráfico 3: Resultado Operacional
@@ -905,7 +899,6 @@ def main():
             hoverlabel=dict(bgcolor='white', font_size=13, bordercolor='#667eea'),
             margin=dict(l=60, r=60, t=80, b=60)
         )
-        
         fig_evolucao.update_xaxes(gridcolor='#e8e8e8', tickfont=dict(size=11, family='Arial', color=CORES['escuro']), tickangle=0)
         fig_evolucao.update_yaxes(gridcolor='#e8e8e8', tickfont=dict(size=11, family='Arial'))
         
@@ -923,7 +916,6 @@ def main():
         """, unsafe_allow_html=True)
         
         fig_ranking_seg = go.Figure()
-        
         fig_ranking_seg.add_trace(go.Bar(
             y=df_seg['Seguradora'].head(15),
             x=df_seg['Total'].head(15),
@@ -952,8 +944,8 @@ def main():
             font=dict(family='Segoe UI', size=12),
             margin=dict(l=180, r=150, t=80, b=60)
         )
-        
         fig_ranking_seg.update_xaxes(gridcolor='#e8e8e8', tickformat=',.0f')
+        
         st.plotly_chart(fig_ranking_seg, use_container_width=True)
     
     # =============================================================================
@@ -968,8 +960,8 @@ def main():
         """, unsafe_allow_html=True)
         
         meses_dist = ['Janeiro', 'Fevereiro', 'Março', 'Abril']
-        partner = [3336, 4984, 10849, 0]
-        maldivas = [986, 1818, 4976, 0]
+        partner = [3336, 4984, 10849, 5406]
+        maldivas = [986, 1818, 4976, 2911]
         
         fig_dist = make_subplots(
             rows=1, cols=2,
@@ -984,6 +976,7 @@ def main():
                    text=[f"R$ {v/1000:.1f}K" for v in partner], textposition='outside', textfont=dict(size=11, family='Arial Black'), width=0.35),
             row=1, col=1
         )
+        
         fig_dist.add_trace(
             go.Bar(name='Maldivas (35%)', x=meses_dist, y=maldivas, marker_color='#f5576c', marker_line=dict(width=2, color='white'),
                    text=[f"R$ {v/1000:.1f}K" for v in maldivas], textposition='outside', textfont=dict(size=11, family='Arial Black'), width=0.35),
@@ -991,7 +984,7 @@ def main():
         )
         
         fig_dist.add_trace(
-            go.Pie(labels=['Partner', 'Maldivas'], values=[19169, 7780], hole=0.55,
+            go.Pie(labels=['Partner', 'Maldivas'], values=[24575, 10691], hole=0.55,
                    marker=dict(colors=['#667eea', '#f5576c'], line=dict(width=3, color='white')),
                    textinfo='label+percent', textfont=dict(size=14, family='Arial Black'),
                    hovertemplate='<b>%{label}</b><br>Valor: R$ %{value:,.0f}<br>%{percent}<extra></extra>'),
@@ -999,9 +992,13 @@ def main():
         )
         
         fig_dist.update_layout(
-            height=480, paper_bgcolor='white', plot_bgcolor='rgba(0,0,0,0)', barmode='group',
+            height=480,
+            paper_bgcolor='white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            barmode='group',
             legend=dict(orientation='h', yanchor='bottom', y=-0.18, xanchor='center', x=0.3, font=dict(size=12, family='Arial Black')),
-            font=dict(family='Segoe UI', size=12), margin=dict(l=60, r=60, t=80, b=80)
+            font=dict(family='Segoe UI', size=12),
+            margin=dict(l=60, r=60, t=80, b=80)
         )
         fig_dist.update_yaxes(gridcolor='#e8e8e8', range=[0, max(max(partner), max(maldivas)) * 1.3], tickformat=',.0f', row=1, col=1)
         
@@ -1021,9 +1018,11 @@ def main():
         col1, col2 = st.columns(2)
         
         with col1:
-            fig_prod = px.sunburst(df_prod, path=['Produto'], values='Total', color='Total', color_continuous_scale='YlOrRd', title='☀️ Distribuição por Produto (Sunburst)')
+            fig_prod = px.sunburst(df_prod, path=['Produto'], values='Total', color='Total', color_continuous_scale='YlOrRd',
+                                   title='☀️ Distribuição por Produto (Sunburst)')
             fig_prod.update_layout(height=550, paper_bgcolor='white', font=dict(family='Segoe UI', size=12),
-                                   title=dict(font=dict(size=18, family='Arial Black', color='#1E3A5F'), x=0.5, xanchor='center'), margin=dict(l=40, r=40, t=80, b=40))
+                                   title=dict(font=dict(size=18, family='Arial Black', color='#1E3A5F'), x=0.5, xanchor='center'),
+                                   margin=dict(l=40, r=40, t=80, b=40))
             fig_prod.update_traces(textinfo='label+percent entry', textfont=dict(size=12, family='Arial Black'),
                                    hovertemplate='<b>%{label}</b><br>Comissão: R$ %{value:,.2f}<br>Participação: %{percentEntry:.1%}<extra></extra>')
             st.plotly_chart(fig_prod, use_container_width=True)
@@ -1033,7 +1032,8 @@ def main():
             fig_prod_bar.add_trace(go.Bar(
                 y=df_prod['Produto'], x=df_prod['Total'], orientation='h',
                 marker=dict(color=df_prod['Total'], colorscale='YlOrRd', showscale=True,
-                           colorbar=dict(title=dict(text='Comissão', font=dict(size=12)), thickness=15, len=0.7), line=dict(width=1, color='white')),
+                            colorbar=dict(title=dict(text='Comissão', font=dict(size=12)), thickness=15, len=0.7),
+                            line=dict(width=1, color='white')),
                 text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_prod['Total'], df_prod['% do Total'])],
                 textposition='outside', textfont=dict(size=11, family='Arial Black', color='#1E3A5F'),
                 hovertemplate='<b>%{y}</b><br>Comissão: R$ %{x:,.2f}<extra></extra>', width=0.7
@@ -1073,7 +1073,6 @@ def main():
                 textinfo='label+percent', textposition='outside', textfont=dict(size=12, family='Arial Black'),
                 hovertemplate='<b>%{label}</b><br>Comissão: R$ %{value:,.2f}<br>Participação: %{percent}<extra></extra>'
             ))
-            
             fig_orig.update_layout(
                 title=dict(text='🏅 Distribuição de Comissão por Originador', font=dict(size=18, family='Arial Black', color='#1E3A5F'), x=0.5, xanchor='center'),
                 height=550, paper_bgcolor='white',
@@ -1114,16 +1113,15 @@ def main():
         """, unsafe_allow_html=True)
         
         fig_ranking_cli = go.Figure()
-        
         fig_ranking_cli.add_trace(go.Bar(
             y=df_cli['Cliente'].head(15), x=df_cli['Total'].head(15), orientation='h',
             marker=dict(color=df_cli['Total'].head(15), colorscale='Tealgrn', showscale=True,
-                       colorbar=dict(title=dict(text='Receita (R$)', font=dict(size=12)), thickness=15, len=0.7), line=dict(width=1, color='white')),
+                        colorbar=dict(title=dict(text='Receita (R$)', font=dict(size=12)), thickness=15, len=0.7),
+                        line=dict(width=1, color='white')),
             text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_cli['Total'].head(15), df_cli['% do Total'].head(15))],
             textposition='outside', textfont=dict(size=11, family='Arial Black', color='#1E3A5F'),
             hovertemplate='<b>%{y}</b><br>Receita: R$ %{x:,.2f}<extra></extra>', width=0.7
         ))
-        
         fig_ranking_cli.update_layout(
             title=dict(text='🏢 Top 15 Clientes por Volume de Receita', font=dict(size=18, family='Arial Black', color='#1E3A5F'), x=0.5, xanchor='center'),
             height=650, paper_bgcolor='white', plot_bgcolor='rgba(0,0,0,0)',
@@ -1146,7 +1144,6 @@ def main():
         """, unsafe_allow_html=True)
         
         fig_desp_bar = go.Figure()
-        
         fig_desp_bar.add_trace(go.Bar(
             x=df_cat['Categoria'].head(10), y=df_cat['Total'].head(10),
             marker=dict(color=df_cat['Total'].head(10), colorscale='Reds', showscale=False, line=dict(width=1, color='white')),
@@ -1154,11 +1151,10 @@ def main():
             textposition='outside', textfont=dict(size=11, family='Arial Black', color='#1E3A5F'),
             hovertemplate='<b>%{x}</b><br>Valor: R$ %{y:,.2f}<extra></extra>', width=0.7
         ))
-        
         fig_desp_bar.update_layout(
             title=dict(text='📊 Top 10 Categorias de Despesas', font=dict(size=18, family='Arial Black', color='#1E3A5F'), x=0.5, xanchor='center'),
-            height=550, paper_bgcolor='white', plot_bgcolor='rgba(0,0,0,0)', xaxis_tickangle=-35,
-            xaxis=dict(tickfont=dict(size=10, family='Arial')),
+            height=550, paper_bgcolor='white', plot_bgcolor='rgba(0,0,0,0)',
+            xaxis_tickangle=-35, xaxis=dict(tickfont=dict(size=10, family='Arial')),
             yaxis_title=dict(text='Valor (R$)', font=dict(size=13, family='Arial Black')),
             yaxis=dict(range=[0, df_cat['Total'].head(10).max() * 1.25]),
             font=dict(family='Segoe UI', size=12), margin=dict(l=80, r=60, t=80, b=180)
@@ -1177,19 +1173,39 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Tabela de resumo
+        # Tabela de resumo LIMPA - sem as linhas removidas
         resumo_data = {
             'Indicador': [
-                '💰 RECEITA BRUTA TOTAL', 'Receita Bruta (Produção Direta)', 'Impostos Diretos',
-                'Custo Operacional (D.A)', 'Co-Corretagem', 'Rebate AAI', '(=) Margem de Contribuição',
-                'Despesas', 'Folha + Terceiros', 'EBITDA Societário', '🎯 RESULTADO OPERACIONAL TOTAL',
-                '→ Sócio Partner (65%)', '→ Sócio Maldivas (35%)', 'Valor a pagar para a Maldivas'
+                '💰 RECEITA BRUTA TOTAL',
+                'Receita Bruta (Produção Direta)',
+                'Impostos Diretos',
+                'Custo Operacional (D.A)',
+                'Co-Corretagem',
+                'Rebate AAI',
+                '(=) Margem de Contribuição',
+                'Despesas',
+                'Folha + Terceiros',
+                'EBITDA Societário',
+                '🎯 RESULTADO OPERACIONAL TOTAL',
+                '📊 RESULTADO OPERACIONAL - DISTRIBUIÇÃO',
+                '→ Sócio Partner (65%)',
+                '→ Sócio Maldivas (35%)'
             ],
             'Valor': [
-                'R$ 180.797,00', 'R$ 180.522,00', '(R$ 31.465,00)',
-                '(R$ 15.045,00)', 'R$ 839,00', '(R$ 51.192,00)', 'R$ 83.658,00',
-                '(R$ 29.104,00)', '(R$ 16.946,00)', 'R$ 37.608,00', 'R$ 37.807,00',
-                'R$ 19.169,00', 'R$ 7.780,00', 'R$ 21.787,00'
+                'R$ 180.797,00',
+                'R$ 180.522,00',
+                '(R$ 31.465,00)',
+                '(R$ 15.045,00)',
+                'R$ 839,00',
+                '(R$ 51.192,00)',
+                'R$ 83.658,00',
+                '(R$ 29.104,00)',
+                '(R$ 16.946,00)',
+                'R$ 37.608,00',
+                'R$ 37.807,00',
+                'R$ 35.266,00',
+                'R$ 24.575,00',
+                'R$ 10.691,00'
             ]
         }
         
@@ -1208,7 +1224,6 @@ def main():
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 2, 1])
-    
     with col2:
         if st.button("📄 GERAR PDF PROFISSIONAL", type="primary", use_container_width=True):
             with st.spinner("Gerando PDF profissional com ReportLab..."):
@@ -1256,7 +1271,6 @@ def main():
         </p>
     </div>
     """, unsafe_allow_html=True)
-
 
 # =============================================================================
 # 🚀 EXECUÇÃO DA APLICAÇÃO
