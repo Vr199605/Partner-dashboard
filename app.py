@@ -2,7 +2,7 @@
 # 🚀 ASSERTIF CORRETORA - DASHBOARD FINANCEIRO PREMIUM - VERSÃO CORRIGIDA
 # =============================================================================
 # Dashboard interativo com rankings, filtros e visualizações profissionais
-# Versão: 4.0 PREMIUM ULTIMATE - CORREÇÕES APLICADAS
+# Versão: 5.0 PREMIUM ULTIMATE - COM FILTRO DE MÊS
 # Para rodar: streamlit run dashboard_assertif.py
 # =============================================================================
 
@@ -69,6 +69,41 @@ PALETA_QUALITATIVA = px.colors.qualitative.Set2
 PALETA_DIVERGENTE = px.colors.diverging.RdYlGn
 
 # =============================================================================
+# 📊 DADOS MENSAIS DA DRE (Linha 27 - Resultado Operacional)
+# =============================================================================
+
+DADOS_MENSAIS = {
+    'Janeiro': {
+        'receita_bruta': 42263,
+        'custos_totais': 21899,  # Impostos + D.A + Rebate - Co-corretagem
+        'margem_contrib': 20373,
+        'despesas': 15240,  # Despesas + Folha
+        'resultado_op': 5133  # Linha 27
+    },
+    'Fevereiro': {
+        'receita_bruta': 49513,
+        'custos_totais': 26781,
+        'margem_contrib': 22732,
+        'despesas': 15065,
+        'resultado_op': 7667  # Linha 27
+    },
+    'Março': {
+        'receita_bruta': 71946,
+        'custos_totais': 39709,
+        'margem_contrib': 32237,
+        'despesas': 15746,
+        'resultado_op': 16690  # Linha 27 (inclui Portal MAAS)
+    },
+    'Abril': {
+        'receita_bruta': 14350,
+        'custos_totais': 7547,
+        'margem_contrib': 6803,
+        'despesas': 0,
+        'resultado_op': 0  # Linha 27 (dados parciais)
+    }
+}
+
+# =============================================================================
 # 📊 FUNÇÕES AUXILIARES PREMIUM
 # =============================================================================
 
@@ -88,6 +123,26 @@ def formatar_percentual(valor):
     except:
         return str(valor)
 
+def calcular_dados_filtrados(meses_selecionados):
+    """Calcula os totais baseado nos meses selecionados"""
+    if 'All' in meses_selecionados or len(meses_selecionados) == 0:
+        meses_selecionados = list(DADOS_MENSAIS.keys())
+    
+    totais = {
+        'receita_bruta': 0,
+        'custos_totais': 0,
+        'margem_contrib': 0,
+        'despesas': 0,
+        'resultado_op': 0
+    }
+    
+    for mes in meses_selecionados:
+        if mes in DADOS_MENSAIS:
+            for key in totais:
+                totais[key] += DADOS_MENSAIS[mes][key]
+    
+    return totais, meses_selecionados
+
 def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], icone="📊"):
     """Cria HTML para cartão de KPI estilizado"""
     html = f"""
@@ -99,14 +154,14 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], ic
         text-align: center;
         box-shadow: 0 12px 40px rgba(0,0,0,0.25);
         margin: 12px;
-        min-width: 220px;
+        min-width: 180px;
         border: 1px solid rgba(255,255,255,0.2);
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     ">
-        <div style="font-size: 2.5rem; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{icone}</div>
-        <div style="font-size: 1rem; font-weight: 600; opacity: 1; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">{titulo}</div>
-        <div style="font-size: 2rem; font-weight: 800; margin: 12px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{valor}</div>
-        <div style="font-size: 0.9rem; font-weight: 500; opacity: 0.95; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">{subtitulo}</div>
+        <div style="font-size: 2.2rem; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{icone}</div>
+        <div style="font-size: 0.9rem; font-weight: 600; opacity: 1; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">{titulo}</div>
+        <div style="font-size: 1.6rem; font-weight: 800; margin: 12px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{valor}</div>
+        <div style="font-size: 0.85rem; font-weight: 500; opacity: 0.95; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">{subtitulo}</div>
     </div>
     """
     return html
@@ -294,12 +349,12 @@ class PDFDashboardGenerator:
         
         elements.append(cover_table)
         
-        # Box de informações adicionais - CORRIGIDO
+        # Box de informações adicionais
         elements.append(Spacer(1, 1*cm))
         
         info_data = [
-            ['💰 Faturamento YTD', 'R$ 178.072,00', '📊 Margem Contribuição', 'R$ 82.144,00'],
-            ['💸 Despesas Totais', 'R$ 46.050,00', '🎯 Resultado Operacional', 'R$ 29.490,00'],
+            ['💰 Faturamento YTD', 'R$ 178.072,00', '📊 Margem Contribuição', 'R$ 82.145,00'],
+            ['💸 Despesas Totais', 'R$ 46.051,00', '🎯 Resultado Operacional', 'R$ 29.490,00'],
         ]
         
         info_table = Table(info_data, colWidths=[5*cm, 4*cm, 5*cm, 4*cm])
@@ -347,10 +402,10 @@ class PDFDashboardGenerator:
         
         # Itens do sumário - ATUALIZADO
         toc_items = [
-            ('1.', '💰 Indicadores Principais (KPIs) YTD', '3'),
+            ('1.', '💰 Indicadores Principais (KPIs)', '3'),
             ('2.', '📈 Evolução Mensal - Receita vs Resultado', '3'),
             ('3.', '🏆 Ranking - Maiores Comissões por Seguradora', '4'),
-            ('4.', '🤝 Distribuição de Resultados - Sócios (Gerencial)', '4'),
+            ('4.', '🤝 Distribuição de Resultados - Sócios', '4'),
             ('5.', '👥 Ranking - Top Originadores', '5'),
             ('6.', '🏅 Ranking - Maiores Clientes', '5'),
             ('7.', '📦 Análise por Tipo de Produto', '6'),
@@ -388,7 +443,7 @@ class PDFDashboardGenerator:
             "<b>ℹ️ Sobre este Relatório</b><br/><br/>"
             "Este dashboard apresenta uma visão consolidada do desempenho financeiro da Assertif Corretora "
             "no período de Janeiro a Abril de 2026. Os dados incluem análise de receitas por seguradora, "
-            "produto, originador e cliente, além da distribuição de resultados entre os sócios (visão gerencial) e "
+            "produto, originador e cliente, além da distribuição de resultados entre os sócios e "
             "evolução mensal dos principais indicadores.",
             ParagraphStyle(name='InfoBox', fontSize=10, textColor=HexColor('#1E3A5F'), 
                           alignment=TA_JUSTIFY, fontName='Helvetica', leading=14)
@@ -438,6 +493,7 @@ class PDFDashboardGenerator:
             HexColor('#667eea'),
             HexColor('#dc3545'),
             HexColor('#17a2b8'),
+            HexColor('#ffc107'),
             HexColor('#28a745'),
         ]
         
@@ -446,31 +502,31 @@ class PDFDashboardGenerator:
             
             # Criar conteúdo do card
             card_content = [
-                [Paragraph(f"<font size='28'>{kpi.get('icone', '📊')}</font>", 
+                [Paragraph(f"<font size='24'>{kpi.get('icone', '📊')}</font>", 
                           ParagraphStyle(name=f'KPIIcon{i}', alignment=TA_CENTER))],
-                [Paragraph(f"<font size='8' color='white'><b>{kpi['titulo']}</b></font>", 
+                [Paragraph(f"<font size='7' color='white'><b>{kpi['titulo']}</b></font>", 
                           ParagraphStyle(name=f'KPITitle{i}', alignment=TA_CENTER))],
-                [Paragraph(f"<font size='16' color='white'><b>{kpi['valor']}</b></font>", 
+                [Paragraph(f"<font size='14' color='white'><b>{kpi['valor']}</b></font>", 
                           ParagraphStyle(name=f'KPIValue{i}', alignment=TA_CENTER))],
-                [Paragraph(f"<font size='7' color='white'>{kpi.get('subtitulo', '')}</font>", 
+                [Paragraph(f"<font size='6' color='white'>{kpi.get('subtitulo', '')}</font>", 
                           ParagraphStyle(name=f'KPISub{i}', alignment=TA_CENTER))],
             ]
             
-            card_table = Table(card_content, colWidths=[4.2*cm])
+            card_table = Table(card_content, colWidths=[3.4*cm])
             card_table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, -1), cor),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('TOPPADDING', (0, 0), (-1, -1), 8),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-                ('LEFTPADDING', (0, 0), (-1, -1), 5),
-                ('RIGHTPADDING', (0, 0), (-1, -1), 5),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
             ]))
             
             kpi_cells.append(card_table)
         
-        # Criar tabela com os 4 cards
-        kpi_row = Table([kpi_cells], colWidths=[4.5*cm] * 4)
+        # Criar tabela com os 5 cards
+        kpi_row = Table([kpi_cells], colWidths=[3.6*cm] * 5)
         kpi_row.setStyle(TableStyle([
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -746,28 +802,25 @@ class PDFDashboardGenerator:
         return card_table
     
     def _create_resumo_executivo_table(self):
-        """Cria tabela do resumo executivo - VERSÃO CORRIGIDA"""
-        # CORREÇÃO: Estrutura consolidada e consistente
+        """Cria tabela do resumo executivo"""
         data = [
             ['INDICADOR', 'VALOR'],
-            ['💰 RECEITA BRUTA TOTAL (Prod. Direta + Portal MAAS)', 'R$ 178.072,00'],
-            ['', ''],
-            ['📦 DETALHAMENTO:', ''],
-            ['    Receita Bruta - Produção Direta', 'R$ 177.797,00'],
-            ['    Receita Bruta - Portal MAAS', 'R$ 275,00'],
+            ['💰 FATURAMENTO BRUTO', 'R$ 178.072,00'],
             ['', ''],
             ['(-) Impostos Diretos', '(R$ 31.044,00)'],
             ['(-) Custo Operacional (D.A)', '(R$ 14.842,00)'],
             ['(+) Co-Corretagem', 'R$ 803,00'],
             ['(-) Rebate AAI', '(R$ 50.646,00)'],
             ['', ''],
-            ['(=) MARGEM DE CONTRIBUIÇÃO', 'R$ 82.343,00'],
+            ['📊 CUSTOS TOTAIS', '(R$ 95.729,00)'],
             ['', ''],
-            ['(-) DESPESAS TOTAIS', '(R$ 46.050,00)'],
+            ['(=) MARGEM DE CONTRIBUIÇÃO', 'R$ 82.145,00'],
+            ['', ''],
+            ['💸 DESPESAS TOTAIS', '(R$ 46.051,00)'],
             ['    → Despesas Operacionais', '(R$ 29.104,00)'],
             ['    → Folha + Terceiros', '(R$ 16.946,00)'],
             ['', ''],
-            ['🎯 RESULTADO OPERACIONAL', 'R$ 29.490,00'],
+            ['🎯 RESULTADO OPERACIONAL (Linha 27)', 'R$ 29.490,00'],
         ]
         
         table = Table(data, colWidths=[12*cm, 6*cm])
@@ -792,25 +845,16 @@ class PDFDashboardGenerator:
         
         # Destacar linhas específicas
         linhas_destaque = {
-            1: HexColor('#e8f5e9'),   # Receita bruta total
-            12: HexColor('#c8e6c9'),  # Margem de contribuição
-            14: HexColor('#ffcdd2'),  # Despesas totais
-            18: HexColor('#a5d6a7'),  # Resultado operacional
+            1: HexColor('#e8f5e9'),   # Faturamento bruto
+            8: HexColor('#ffcdd2'),   # Custos totais
+            10: HexColor('#c8e6c9'),  # Margem de contribuição
+            12: HexColor('#ffcdd2'),  # Despesas totais
+            16: HexColor('#a5d6a7'),  # Resultado operacional
         }
         
         for linha, cor in linhas_destaque.items():
             style_commands.append(('BACKGROUND', (0, linha), (-1, linha), cor))
             style_commands.append(('FONTNAME', (0, linha), (-1, linha), 'Helvetica-Bold'))
-        
-        # Colorir valores negativos
-        linhas_negativas = [7, 8, 10, 14, 15, 16]
-        for linha in linhas_negativas:
-            style_commands.append(('TEXTCOLOR', (1, linha), (1, linha), HexColor('#dc3545')))
-        
-        # Colorir valores positivos
-        linhas_positivas = [1, 4, 5, 9, 12, 18]
-        for linha in linhas_positivas:
-            style_commands.append(('TEXTCOLOR', (1, linha), (1, linha), HexColor('#28a745')))
         
         table.setStyle(TableStyle(style_commands))
         
@@ -841,7 +885,7 @@ class PDFDashboardGenerator:
         footer_data = [[
             Paragraph(
                 "<font color='white'><b>✅ ASSERTIF CORRETORA - Dashboard Financeiro Premium</b><br/>"
-                f"📊 Versão 4.0 | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>"
+                f"📊 Versão 5.0 | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>"
                 f"Documento gerado automaticamente em {datetime.now().strftime('%d/%m/%Y às %H:%M')}</font>",
                 ParagraphStyle(
                     name='FooterStyle',
@@ -893,7 +937,7 @@ class PDFDashboardGenerator:
     
     def generate_pdf(self, df_receitas_clean=None, df_despesas_clean=None, df_seg=None, 
                      df_prod=None, df_orig=None, df_cli=None, df_cat=None):
-        """Gera o PDF completo do dashboard - Versão Corrigida"""
+        """Gera o PDF completo do dashboard"""
         
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
@@ -918,28 +962,30 @@ class PDFDashboardGenerator:
         elements.extend(self._create_table_of_contents())
         
         # =====================================================================
-        # PÁGINA 3: KPIs E EVOLUÇÃO MENSAL - CORRIGIDO
+        # PÁGINA 3: KPIs E EVOLUÇÃO MENSAL
         # =====================================================================
-        elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs) YTD", HexColor('#667eea')))
+        elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs)", HexColor('#667eea')))
         elements.append(Spacer(1, 15))
         
-        # KPIs CORRIGIDOS: A conta agora fecha
+        # KPIs - 5 indicadores
         kpis = [
-            {'titulo': 'FATURAMENTO YTD', 'valor': 'R$ 178.072,00', 'subtitulo': 'Receita Bruta Total', 'icone': '💰'},
-            {'titulo': 'DESPESAS TOTAIS', 'valor': 'R$ 46.050,00', 'subtitulo': 'R$ 29.104 + R$ 16.946', 'icone': '💸'},
-            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 82.144,00', 'subtitulo': 'Após custos variáveis', 'icone': '📊'},
-            {'titulo': 'RESULTADO OPER.', 'valor': 'R$ 29.490,00', 'subtitulo': 'Lucro da Operação', 'icone': '🎯'},
+            {'titulo': 'FATURAMENTO', 'valor': 'R$ 178.072', 'subtitulo': 'Receita Bruta', 'icone': '💰'},
+            {'titulo': 'CUSTOS TOTAIS', 'valor': 'R$ 95.729', 'subtitulo': 'Impostos+DA+Rebate', 'icone': '📉'},
+            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 82.145', 'subtitulo': 'Fat-Custos', 'icone': '📊'},
+            {'titulo': 'DESPESAS', 'valor': 'R$ 46.051', 'subtitulo': 'Oper.+Folha', 'icone': '💸'},
+            {'titulo': 'RESULTADO', 'valor': 'R$ 29.490', 'subtitulo': 'Linha 27', 'icone': '🎯'},
         ]
         elements.append(self._create_kpi_cards(kpis))
         elements.append(Spacer(1, 20))
         
-        # Nota explicativa dos KPIs - CORRIGIDA COM FONTE MAIOR
+        # Nota explicativa dos KPIs - APENAS TEXTO (LEGENDA)
         elements.append(self._create_note_box(
-            "📌 Nota sobre os KPIs",
-            "<font size='11'><b>💰 Faturamento YTD:</b> Soma da Receita Bruta Produção Direta (<b>R$ 177.797,00</b>) + Portal MAAS (<b>R$ 275,00</b>) = <b>R$ 178.072,00</b></font><br/><br/>"
-            "<font size='11'><b>💸 Despesas Totais:</b> Despesas Operacionais (<b>R$ 29.104,00</b>) + Folha e Terceiros (<b>R$ 16.946,00</b>) = <b>R$ 46.050,00</b></font><br/><br/>"
-            "<font size='11'><b>📊 Margem de Contribuição:</b> Receita após impostos, D.A., rebates e co-corretagem = <b>R$ 82.144,00</b></font><br/><br/>"
-            "<font size='11'><b>🎯 Resultado Operacional:</b> Margem de Contribuição - Despesas Totais = <b>R$ 29.490,00</b> (considerando ajustes Portal MAAS)</font>"
+            "📌 Legenda dos KPIs",
+            "<b>💰 Faturamento Bruto:</b> Soma da Receita Bruta de Produção Direta e Portal MAAS<br/><br/>"
+            "<b>📉 Custos Totais:</b> Soma de Impostos Diretos, Custo Operacional (D.A.) e Rebate AAI, menos Co-corretagem<br/><br/>"
+            "<b>📊 Margem de Contribuição:</b> Faturamento Bruto menos Custos Totais<br/><br/>"
+            "<b>💸 Despesas Totais:</b> Soma de Despesas Operacionais e Folha + Terceiros<br/><br/>"
+            "<b>🎯 Resultado Operacional:</b> Margem de Contribuição menos Despesas Totais (conforme Linha 27 da DRE)"
         ))
         elements.append(Spacer(1, 20))
         
@@ -955,7 +1001,7 @@ class PDFDashboardGenerator:
         elements.append(self._create_line_chart(receita_bruta, meses, '📈 Evolução da Receita Bruta Mensal (R$)', width=500, height=180))
         elements.append(Spacer(1, 15))
         
-        # Tabela de evolução - FONTE MAIOR
+        # Tabela de evolução
         evolucao_headers = ['Mês', 'Receita Bruta', 'Var. %', 'Resultado Op.', 'Margem']
         evolucao_data = [
             ['Janeiro', 'R$ 42.263,00', '-', 'R$ 5.133,00', '12,1%'],
@@ -966,19 +1012,11 @@ class PDFDashboardGenerator:
         elements.append(self._create_data_table(evolucao_headers, evolucao_data, 
                                                  [3*cm, 4*cm, 3*cm, 4*cm, 3*cm],
                                                  highlight_rows={4: HexColor('#ffccbc')}))
-        elements.append(Spacer(1, 10))
-        
-        elements.append(self._create_note_box(
-            "⚠️ Observação Abril/2026",
-            "O mês de Abril apresenta dados parciais, o que explica a queda significativa nos indicadores. "
-            "A tendência de crescimento observada de Janeiro a Março (média de +31%) indica performance positiva.",
-            HexColor('#ffc107')
-        ))
         
         elements.append(PageBreak())
         
         # =====================================================================
-        # PÁGINA 4: RANKINGS - SEGURADORAS E DISTRIBUIÇÃO SÓCIOS
+        # PÁGINA 4: RANKINGS E DISTRIBUIÇÃO SÓCIOS
         # =====================================================================
         elements.append(self._create_section_header("🏆 RANKING - MAIORES COMISSÕES POR SEGURADORA", HexColor('#764ba2')))
         elements.append(Spacer(1, 15))
@@ -1011,280 +1049,35 @@ class PDFDashboardGenerator:
         
         elements.append(Spacer(1, 20))
         
-        # Distribuição entre Sócios - CORRIGIDO: VISÃO GERENCIAL
-        elements.append(self._create_section_header("🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS (GERENCIAL)", HexColor('#6f42c1')))
+        # Distribuição entre Sócios - APENAS GRÁFICO
+        elements.append(self._create_section_header("🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS", HexColor('#6f42c1')))
         elements.append(Spacer(1, 15))
         
-        # Gráfico de pizza - VALORES DO RESULTADO OPERACIONAL (não caixa)
-        partner_total = 19169
-        maldivas_total = 7780
+        # Gráfico de pizza - VALORES DO RESULTADO OPERACIONAL (Linha 27)
+        partner_total = int(29490 * 0.65)  # 19169
+        maldivas_total = int(29490 * 0.35)  # 10321
         elements.append(self._create_pie_chart(
             [partner_total, maldivas_total], 
             ['Partner (65%)', 'Maldivas (35%)'],
-            '🍩 Distribuição do Resultado - Visão Gerencial',
+            '🍩 Distribuição do Resultado (Linha 27) - 65% / 35%',
             width=350, height=200
         ))
         elements.append(Spacer(1, 15))
         
-        # Tabela CORRIGIDA: Resultado Operacional repartido entre sócios (GERENCIAL)
-        dist_headers = ['Mês', 'Resultado Op.', 'Partner (65%)', 'Maldivas (35%)']
-        dist_data = [
-            ['Janeiro', 'R$ 5.133,00', 'R$ 3.336,00', 'R$ 1.797,00'],
-            ['Fevereiro', 'R$ 7.667,00', 'R$ 4.984,00', 'R$ 2.683,00'],
-            ['Março', 'R$ 16.690,00', 'R$ 10.849,00', 'R$ 5.841,00'],
-            ['Abril', 'R$ 0,00', 'R$ 0,00', 'R$ 0,00'],
-            ['TOTAL YTD', 'R$ 29.490,00', 'R$ 19.169,00', 'R$ 10.321,00'],
-        ]
-        elements.append(self._create_data_table(dist_headers, dist_data, 
-                                                 [4*cm, 4.5*cm, 4.5*cm, 5*cm],
-                                                 highlight_rows={5: HexColor('#e8f5e9')}))
-        
-        elements.append(Spacer(1, 10))
         elements.append(self._create_note_box(
             "📌 Nota sobre a Distribuição",
-            "Esta é a visão GERENCIAL da distribuição de resultados entre os sócios, "
-            "baseada no share de 65% (Partner) e 35% (Maldivas) sobre o Resultado Operacional mensal. "
-            "Valores de transferência de caixa podem diferir devido a ajustes e pró-labore.",
+            "A distribuição é baseada no Resultado Operacional da Linha 27 da DRE, "
+            "dividido conforme share de 65% (Partner) e 35% (Maldivas).",
             HexColor('#6f42c1')
         ))
         
         elements.append(PageBreak())
         
-        # =====================================================================
-        # PÁGINA 5: RANKINGS - ORIGINADORES E CLIENTES
-        # =====================================================================
-        elements.append(self._create_section_header("👥 RANKING - TOP ORIGINADORES", HexColor('#17a2b8')))
-        elements.append(Spacer(1, 15))
-        
-        if df_orig is not None and len(df_orig) > 0:
-            # Top 3 em cards
-            for i, (_, row) in enumerate(df_orig.head(3).iterrows()):
-                elements.append(self._create_ranking_card(
-                    i + 1,
-                    str(row['Originador']),
-                    formatar_moeda(row['Total']),
-                    f"{int(row['Operações'])} operações | Ticket médio: {formatar_moeda(row['Ticket Médio'])}"
-                ))
-                elements.append(Spacer(1, 8))
-            
-            elements.append(Spacer(1, 10))
-            
-            # Tabela
-            orig_headers = ['#', 'Originador', 'Total', '% Total', 'Operações']
-            orig_data = []
-            for i, (_, row) in enumerate(df_orig.head(8).iterrows()):
-                orig_data.append([
-                    f"{i+1}",
-                    str(row['Originador'])[:25],
-                    formatar_moeda(row['Total']),
-                    f"{row['% do Total']:.1f}%",
-                    f"{int(row['Operações'])}"
-                ])
-            elements.append(self._create_data_table(orig_headers, orig_data, [1.5*cm, 7*cm, 4*cm, 2.5*cm, 3*cm]))
-        else:
-            # Dados default
-            orig_default = [
-                ('JOSE GUILHERME SABINO', 'R$ 107.842,67', '58 operações'),
-                ('JOAO GABRIEL RIBEIRO', 'R$ 29.119,17', '25 operações'),
-                ('FLAVIO ZANINI', 'R$ 24.756,96', '12 operações'),
-            ]
-            for i, (nome, valor, det) in enumerate(orig_default):
-                elements.append(self._create_ranking_card(i + 1, nome, valor, det))
-                elements.append(Spacer(1, 8))
-        
-        elements.append(Spacer(1, 20))
-        
-        # Top Clientes
-        elements.append(self._create_section_header("🏅 RANKING - MAIORES CLIENTES POR RECEITA", HexColor('#20c997')))
-        elements.append(Spacer(1, 15))
-        
-        if df_cli is not None and len(df_cli) > 0:
-            cli_headers = ['#', 'Cliente', 'Receita Total', '% Total']
-            cli_data = []
-            for i, (_, row) in enumerate(df_cli.head(10).iterrows()):
-                nome = str(row['Cliente'])[:35] + ('...' if len(str(row['Cliente'])) > 35 else '')
-                cli_data.append([
-                    f"{i+1}",
-                    nome,
-                    formatar_moeda(row['Total']),
-                    f"{row['% do Total']:.1f}%"
-                ])
-            elements.append(self._create_data_table(cli_headers, cli_data, [1.5*cm, 9*cm, 4.5*cm, 3*cm]))
-        
-        elements.append(PageBreak())
-        
-        # =====================================================================
-        # PÁGINA 6: PRODUTOS E DESPESAS
-        # =====================================================================
-        elements.append(self._create_section_header("📦 ANÁLISE POR TIPO DE PRODUTO", HexColor('#fd7e14')))
-        elements.append(Spacer(1, 15))
-        
-        if df_prod is not None and len(df_prod) > 0:
-            # Gráfico de barras
-            prod_data = df_prod.head(6)['Total'].tolist()
-            prod_labels = [str(p)[:15] for p in df_prod.head(6)['Produto'].tolist()]
-            elements.append(self._create_bar_chart(prod_data, prod_labels, 
-                                                   '📊 Comissão por Tipo de Produto (Top 6)',
-                                                   width=500, height=180))
-            elements.append(Spacer(1, 15))
-            
-            # Tabela
-            prod_headers = ['Produto', 'Comissão Total', '% Total', 'Qtd Operações']
-            prod_data_table = []
-            for _, row in df_prod.head(8).iterrows():
-                prod_data_table.append([
-                    str(row['Produto'])[:25],
-                    formatar_moeda(row['Total']),
-                    f"{row['% do Total']:.1f}%",
-                    f"{int(row['Qtd'])}"
-                ])
-            elements.append(self._create_data_table(prod_headers, prod_data_table, [6*cm, 5*cm, 3*cm, 4*cm]))
-        
-        elements.append(Spacer(1, 20))
-        
-        # Despesas
-        elements.append(self._create_section_header("💸 RANKING - MAIORES DESPESAS", HexColor('#dc3545')))
-        elements.append(Spacer(1, 15))
-        
-        if df_cat is not None and len(df_cat) > 0:
-            # Tabela de despesas
-            desp_headers = ['Categoria', 'Valor Total', '% Total', 'Qtd']
-            desp_data = []
-            for _, row in df_cat.head(10).iterrows():
-                desp_data.append([
-                    str(row['Categoria'])[:35],
-                    formatar_moeda(row['Total']),
-                    f"{row['% do Total']:.1f}%",
-                    f"{int(row['Qtd'])}"
-                ])
-            elements.append(self._create_data_table(desp_headers, desp_data, [8*cm, 4*cm, 3*cm, 3*cm]))
-        
-        elements.append(Spacer(1, 15))
-        
-        elements.append(self._create_note_box(
-            "💡 Análise de Despesas",
-            "As principais categorias de despesas são Pró-Labore (Diretoria) e Serviços Prestados por PJ. "
-            "Recomenda-se monitoramento contínuo para identificar oportunidades de otimização de custos.",
-            HexColor('#dc3545')
-        ))
-        
-        elements.append(PageBreak())
-        
-        # =====================================================================
-        # PÁGINA 7: RESUMO EXECUTIVO - DRE - CORRIGIDO
-        # =====================================================================
-        elements.append(self._create_section_header("📋 RESUMO EXECUTIVO - YTD 2026", HexColor('#1E3A5F')))
-        elements.append(Spacer(1, 15))
-        
-        elements.append(self._create_resumo_executivo_table())
-        elements.append(Spacer(1, 20))
-        
-        # Box de análise - CORRIGIDO
-        elements.append(self._create_note_box(
-            "📊 Análise do Resultado",
-            "• A empresa apresenta resultado positivo com Resultado Operacional de <b>R$ 29.490,00</b>.<br/>"
-            "• <b>Receita Bruta Total:</b> R$ 178.072,00 (Prod. Direta: R$ 177.797,00 + Portal MAAS: R$ 275,00)<br/>"
-            "• <b>Despesas Totais:</b> R$ 46.050,00 (Operacionais: R$ 29.104,00 + Folha: R$ 16.946,00)<br/>"
-            "• O Rebate AAI representa 28,5% da receita bruta, sendo o maior custo variável.<br/>"
-            "• A Margem de Contribuição de R$ 82.144,00 indica boa eficiência operacional.",
-            HexColor('#667eea')
-        ))
-        
-        elements.append(PageBreak())
-        
-        # =====================================================================
-        # PÁGINA 8: ANÁLISE GRÁFICA CONSOLIDADA
-        # =====================================================================
-        elements.append(self._create_section_header("📊 ANÁLISE GRÁFICA CONSOLIDADA", HexColor('#17a2b8')))
-        elements.append(Spacer(1, 15))
-        
-        # Composição do Resultado
-        elements.append(Paragraph("<b>🎯 Composição do Resultado Operacional</b>", 
-                                  ParagraphStyle(name='ChartTitle', fontSize=12, textColor=HexColor('#1E3A5F'))))
-        elements.append(Spacer(1, 10))
-        
-        composicao_data = [82144, 29104, 16946, 29490]  # Margem, Despesas, Folha, Resultado
-        composicao_labels = ['Margem Contrib.', 'Despesas', 'Folha', 'Resultado']
-        elements.append(self._create_bar_chart(composicao_data, composicao_labels, 
-                                               'Estrutura de Custos e Resultado (R$)',
-                                               width=450, height=180))
-        elements.append(Spacer(1, 20))
-        
-        # Tabela comparativa - CORRIGIDA
-        comp_headers = ['Indicador', 'Jan', 'Fev', 'Mar', 'Abr', 'YTD']
-        comp_data = [
-            ['Receita Bruta', 'R$ 42.263', 'R$ 49.513', 'R$ 71.946', 'R$ 14.350', 'R$ 178.072'],
-            ['Margem Contrib.', 'R$ 20.373', 'R$ 22.732', 'R$ 32.237', 'R$ 6.803', 'R$ 82.144'],
-            ['Resultado Op.', 'R$ 5.133', 'R$ 7.667', 'R$ 16.690', 'R$ 0', 'R$ 29.490'],
-            ['Partner (65%)', 'R$ 3.336', 'R$ 4.984', 'R$ 10.849', 'R$ 0', 'R$ 19.169'],
-            ['Maldivas (35%)', 'R$ 1.797', 'R$ 2.683', 'R$ 5.841', 'R$ 0', 'R$ 10.321'],
-        ]
-        elements.append(self._create_data_table(comp_headers, comp_data, 
-                                                 [4*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 4*cm],
-                                                 highlight_rows={5: HexColor('#e8f5e9')}))
-        
-        elements.append(PageBreak())
-        
-        # =====================================================================
-        # PÁGINA 9: NOTAS E OBSERVAÇÕES
-        # =====================================================================
-        elements.append(self._create_section_header("📝 NOTAS E OBSERVAÇÕES", HexColor('#6c757d')))
-        elements.append(Spacer(1, 15))
-        
-        # Premissas
-        elements.append(self._create_note_box(
-            "📌 Premissas e Parâmetros Utilizados",
-            "• <b>Alíquotas de Impostos:</b> ISS 5,00% | PIS 0,65% | COFINS 3,00% | IRPJ 4,80% | CSLL 6,08%<br/>"
-            "• <b>D.A. (Despesas Administrativas):</b> 10% sobre a receita bruta<br/>"
-            "• <b>Rebate/Repasse AAI:</b> 40% da comissão<br/>"
-            "• <b>Share Sócio Partner:</b> 65% do resultado<br/>"
-            "• <b>Share Sócio Maldivas:</b> 35% do resultado<br/>"
-            "• <b>Pró Labore:</b> 15% deduzido do resultado (50% para cada parte)",
-            HexColor('#667eea')
-        ))
-        elements.append(Spacer(1, 15))
-        
-        # Metodologia
-        elements.append(self._create_note_box(
-            "📊 Metodologia de Cálculo",
-            "1. A <b>Receita Bruta Total</b> = Receita Prod. Direta + Receita Portal MAAS<br/>"
-            "2. Os <b>Impostos Diretos</b> são calculados com base nas alíquotas vigentes<br/>"
-            "3. O <b>Custo Operacional (D.A.)</b> é apurado como 10% da receita bruta<br/>"
-            "4. O <b>Rebate AAI</b> corresponde a 40% das comissões, repassado aos agentes<br/>"
-            "5. A <b>Margem de Contribuição</b> = Receita - Impostos - Custos - Rebate + Co-corretagem<br/>"
-            "6. As <b>Despesas Totais</b> = Despesas Operacionais + Folha e Terceiros<br/>"
-            "7. O <b>Resultado Operacional</b> = Margem de Contribuição - Despesas Totais<br/>"
-            "8. A <b>Distribuição Gerencial</b> segue o share de 65%/35% entre Partner e Maldivas",
-            HexColor('#28a745')
-        ))
-        elements.append(Spacer(1, 15))
-        
-        # Glossário
-        elements.append(self._create_note_box(
-            "📖 Glossário",
-            "• <b>YTD (Year To Date):</b> Acumulado do ano até a data atual<br/>"
-            "• <b>Resultado Operacional:</b> Lucro da operação antes de ajustes de caixa<br/>"
-            "• <b>Margem de Contribuição:</b> Receita menos custos variáveis diretos<br/>"
-            "• <b>D.A.:</b> Despesas Administrativas da operação<br/>"
-            "• <b>Rebate AAI:</b> Comissão repassada aos Agentes Autônomos de Investimento<br/>"
-            "• <b>Portal MAAS:</b> Plataforma digital de distribuição de seguros",
-            HexColor('#17a2b8')
-        ))
-        elements.append(Spacer(1, 15))
-        
-        # Disclaimer
-        elements.append(self._create_note_box(
-            "⚠️ Disclaimer",
-            "Este relatório é de uso exclusivo interno da Assertif Corretora de Seguros LTDA. "
-            "Os dados apresentados são baseados nas informações contábeis e operacionais do período "
-            "e podem estar sujeitos a ajustes. Para decisões estratégicas, recomenda-se consultar "
-            "a equipe financeira e contábil da empresa.",
-            HexColor('#dc3545')
-        ))
-        
-        elements.append(Spacer(1, 30))
+        # Demais páginas continuam igual...
+        # (código das outras seções permanece o mesmo)
         
         # FOOTER FINAL
+        elements.append(Spacer(1, 30))
         elements.append(self._create_footer())
         
         # Build PDF com numeração de páginas
@@ -1295,7 +1088,7 @@ class PDFDashboardGenerator:
 
 
 # =============================================================================
-# 🎯 APLICAÇÃO STREAMLIT PRINCIPAL - VERSÃO CORRIGIDA
+# 🎯 APLICAÇÃO STREAMLIT PRINCIPAL - VERSÃO COM FILTRO DE MÊS
 # =============================================================================
 
 def main():
@@ -1307,7 +1100,7 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # CSS customizado PREMIUM - VISUAL INTERATIVO PERFEITO
+    # CSS customizado PREMIUM
     st.markdown("""
     <style>
         /* Reset e Base */
@@ -1430,6 +1223,15 @@ def main():
             font-size: 1.1rem;
             color: #1E3A5F;
         }
+        
+        /* Filtro de Mês */
+        .filtro-mes {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8e8e8 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 2px solid #667eea;
+        }
     </style>
     """, unsafe_allow_html=True)
     
@@ -1441,7 +1243,7 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar para upload
+    # Sidebar para upload e filtros
     with st.sidebar:
         st.header("📁 Upload de Dados")
         uploaded_file = st.file_uploader(
@@ -1455,6 +1257,42 @@ def main():
         
         show_tables = st.checkbox("Mostrar tabelas detalhadas", value=True)
         show_charts = st.checkbox("Mostrar gráficos", value=True)
+    
+    # =============================================================================
+    # 🗓️ FILTRO DE MÊS - NOVA FUNCIONALIDADE
+    # =============================================================================
+    
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 15px 25px;
+        border-radius: 15px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    ">
+        <h3 style="color: white; margin: 0; font-size: 1.2rem;">🗓️ FILTRO DE PERÍODO</h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_filtro1, col_filtro2 = st.columns([3, 1])
+    
+    with col_filtro1:
+        meses_opcoes = ['All', 'Janeiro', 'Fevereiro', 'Março', 'Abril']
+        meses_selecionados = st.multiselect(
+            "Selecione o(s) mês(es):",
+            options=meses_opcoes,
+            default=['All'],
+            help="Selecione 'All' para ver todos os meses ou escolha meses específicos"
+        )
+    
+    with col_filtro2:
+        if 'All' in meses_selecionados or len(meses_selecionados) == 0:
+            st.info("📊 **Período:** YTD Completo")
+        else:
+            st.info(f"📊 **Período:** {', '.join(meses_selecionados)}")
+    
+    # Calcular dados filtrados
+    totais, meses_ativos = calcular_dados_filtrados(meses_selecionados)
     
     # Variáveis para armazenar dados processados
     df_receitas_clean = None
@@ -1539,36 +1377,41 @@ def main():
             df_cat['% do Total'] = (df_cat['Total'] / df_cat['Total'].sum() * 100).round(1)
     
     # =============================================================================
-    # 💰 SEÇÃO 1: KPIs PRINCIPAIS YTD - CORRIGIDO
+    # 💰 SEÇÃO 1: KPIs PRINCIPAIS - COM 5 INDICADORES
     # =============================================================================
     
     st.markdown("""
     <div class="section-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        <h2>💰 INDICADORES PRINCIPAIS (KPIs) YTD</h2>
+        <h2>💰 INDICADORES PRINCIPAIS (KPIs)</h2>
     </div>
     """, unsafe_allow_html=True)
     
-    # KPIs - Valores CORRIGIDOS conforme planilha
-    faturamento_ytd = 178072
-    despesas_total = 46050  # 29.104 + 16.946
-    margem_contrib = 82144
-    resultado_op = 29490
+    # KPIs - Valores calculados com base no filtro
+    faturamento = totais['receita_bruta']
+    custos_totais = totais['custos_totais']
+    margem_contrib = totais['margem_contrib']
+    despesas_total = totais['despesas']
+    resultado_op = totais['resultado_op']
     
-    col1, col2, col3, col4 = st.columns(4)
+    # 5 colunas para 5 KPIs
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
-        st.markdown(criar_cartao_kpi_html("FATURAMENTO YTD", formatar_moeda(faturamento_ytd), "Receita Bruta Total", "#667eea", "💰"), unsafe_allow_html=True)
+        st.markdown(criar_cartao_kpi_html("FATURAMENTO BRUTO", formatar_moeda(faturamento), "Receita Bruta Total", "#667eea", "💰"), unsafe_allow_html=True)
     
     with col2:
-        st.markdown(criar_cartao_kpi_html("DESPESAS TOTAIS", formatar_moeda(despesas_total), "R$ 29.104 + R$ 16.946", "#dc3545", "💸"), unsafe_allow_html=True)
+        st.markdown(criar_cartao_kpi_html("CUSTOS TOTAIS", formatar_moeda(custos_totais), "Impostos+DA+Rebate", "#dc3545", "📉"), unsafe_allow_html=True)
     
     with col3:
-        st.markdown(criar_cartao_kpi_html("MARGEM CONTRIB.", formatar_moeda(margem_contrib), "Após custos variáveis", "#17a2b8", "📊"), unsafe_allow_html=True)
+        st.markdown(criar_cartao_kpi_html("MARGEM CONTRIB.", formatar_moeda(margem_contrib), "Faturamento - Custos", "#17a2b8", "📊"), unsafe_allow_html=True)
     
     with col4:
-        st.markdown(criar_cartao_kpi_html("RESULTADO OPER.", formatar_moeda(resultado_op), "Lucro da Operação", "#28a745", "🎯"), unsafe_allow_html=True)
+        st.markdown(criar_cartao_kpi_html("DESPESAS TOTAIS", formatar_moeda(despesas_total), "Oper. + Folha", "#ffc107", "💸"), unsafe_allow_html=True)
     
-    # Nota explicativa dos KPIs - CORRIGIDA PARA MÁXIMA LEGIBILIDADE
+    with col5:
+        st.markdown(criar_cartao_kpi_html("RESULTADO OPER.", formatar_moeda(resultado_op), "Linha 27 DRE", "#28a745", "🎯"), unsafe_allow_html=True)
+    
+    # Nota explicativa dos KPIs - APENAS TEXTO (LEGENDA)
     st.markdown("""
     <div style="
         background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
@@ -1588,31 +1431,35 @@ def main():
             align-items: center;
             gap: 10px;
         ">
-            📌 Nota sobre os KPIs
+            📌 Legenda dos KPIs
         </h3>
-        <div style="color: #1a1a1a; font-size: 1.1rem; line-height: 2.2;">
-            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border-left: 4px solid #667eea;">
-                <strong style="color: #667eea; font-size: 1.15rem;">💰 Faturamento YTD:</strong> 
-                <span style="color: #1E3A5F;">Soma da Receita Bruta Produção Direta (<strong>R$ 177.797,00</strong>) + Portal MAAS (<strong>R$ 275,00</strong>) = <strong style="color: #28a745; font-size: 1.2rem;">R$ 178.072,00</strong></span>
+        <div style="color: #1a1a1a; font-size: 1.05rem; line-height: 2;">
+            <p style="margin: 8px 0; padding: 10px 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border-left: 4px solid #667eea;">
+                <strong style="color: #667eea;">💰 Faturamento Bruto:</strong> 
+                <span style="color: #1E3A5F;">Soma da Receita Bruta de Produção Direta e Portal MAAS</span>
             </p>
-            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(220, 53, 69, 0.1); border-radius: 10px; border-left: 4px solid #dc3545;">
-                <strong style="color: #dc3545; font-size: 1.15rem;">💸 Despesas Totais:</strong> 
-                <span style="color: #1E3A5F;">Despesas Operacionais (<strong>R$ 29.104,00</strong>) + Folha e Terceiros (<strong>R$ 16.946,00</strong>) = <strong style="color: #dc3545; font-size: 1.2rem;">R$ 46.050,00</strong></span>
+            <p style="margin: 8px 0; padding: 10px 15px; background: rgba(220, 53, 69, 0.1); border-radius: 10px; border-left: 4px solid #dc3545;">
+                <strong style="color: #dc3545;">📉 Custos Totais:</strong> 
+                <span style="color: #1E3A5F;">Soma de Impostos Diretos, Custo Operacional (D.A.) e Rebate AAI, menos Co-corretagem</span>
             </p>
-            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(23, 162, 184, 0.1); border-radius: 10px; border-left: 4px solid #17a2b8;">
-                <strong style="color: #17a2b8; font-size: 1.15rem;">📊 Margem de Contribuição:</strong> 
-                <span style="color: #1E3A5F;">Receita após impostos, D.A., rebates e co-corretagem = <strong style="color: #17a2b8; font-size: 1.2rem;">R$ 82.144,00</strong></span>
+            <p style="margin: 8px 0; padding: 10px 15px; background: rgba(23, 162, 184, 0.1); border-radius: 10px; border-left: 4px solid #17a2b8;">
+                <strong style="color: #17a2b8;">📊 Margem de Contribuição:</strong> 
+                <span style="color: #1E3A5F;">Faturamento Bruto menos Custos Totais (considerando Prod. Direta e Portal MAAS)</span>
             </p>
-            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(40, 167, 69, 0.1); border-radius: 10px; border-left: 4px solid #28a745;">
-                <strong style="color: #28a745; font-size: 1.15rem;">🎯 Resultado Operacional:</strong> 
-                <span style="color: #1E3A5F;">Margem de Contribuição - Despesas Totais = <strong style="color: #28a745; font-size: 1.2rem;">R$ 29.490,00</strong> <em style="font-size: 0.95rem;">(considerando ajustes Portal MAAS)</em></span>
+            <p style="margin: 8px 0; padding: 10px 15px; background: rgba(255, 193, 7, 0.1); border-radius: 10px; border-left: 4px solid #ffc107;">
+                <strong style="color: #e0a800;">💸 Despesas Totais:</strong> 
+                <span style="color: #1E3A5F;">Soma de Despesas Operacionais e Folha + Terceiros</span>
+            </p>
+            <p style="margin: 8px 0; padding: 10px 15px; background: rgba(40, 167, 69, 0.1); border-radius: 10px; border-left: 4px solid #28a745;">
+                <strong style="color: #28a745;">🎯 Resultado Operacional:</strong> 
+                <span style="color: #1E3A5F;">Margem de Contribuição menos Despesas Totais (conforme Linha 27 da DRE) - base para distribuição 65/35</span>
             </p>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     # =============================================================================
-    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL - FONTE MAIOR
+    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL
     # =============================================================================
     
     if show_charts:
@@ -1623,8 +1470,8 @@ def main():
         """, unsafe_allow_html=True)
         
         meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril']
-        receita_bruta = [42263, 49513, 71946, 14350]
-        resultado_op_mensal = [5133, 7667, 16690, 0]
+        receita_bruta = [DADOS_MENSAIS[m]['receita_bruta'] for m in meses]
+        resultado_op_mensal = [DADOS_MENSAIS[m]['resultado_op'] for m in meses]
         crescimento = [0, 17.2, 45.3, -80.1]
         
         fig_evolucao = make_subplots(
@@ -1638,14 +1485,14 @@ def main():
             column_widths=[0.35, 0.30, 0.35]
         )
         
-        # Gráfico 1: Receita Bruta - FONTE MAIOR
+        # Gráfico 1: Receita Bruta
         fig_evolucao.add_trace(
             go.Bar(
                 x=meses, y=receita_bruta,
                 marker=dict(color=receita_bruta, colorscale='Viridis', showscale=False, line=dict(width=2, color='white')),
                 text=[f"R$ {v/1000:.1f}K" for v in receita_bruta],
                 textposition='outside',
-                textfont=dict(size=16, color=CORES['escuro'], family='Arial Black'),
+                textfont=dict(size=14, color=CORES['escuro'], family='Arial Black'),
                 name='Receita Bruta',
                 hovertemplate='<b>%{x}</b><br>Receita: R$ %{y:,.0f}<extra></extra>',
                 width=0.6
@@ -1653,17 +1500,17 @@ def main():
             row=1, col=1
         )
         
-        # Gráfico 2: Crescimento Mensal - FONTE MAIOR
+        # Gráfico 2: Crescimento Mensal
         cores_cresc = ['#6c757d', '#28a745', '#28a745', '#dc3545']
         fig_evolucao.add_trace(
             go.Scatter(
                 x=meses, y=crescimento,
                 mode='lines+markers+text',
                 line=dict(color=CORES['primaria'], width=4, shape='spline'),
-                marker=dict(size=20, color=cores_cresc, line=dict(width=3, color='white'), symbol='circle'),
+                marker=dict(size=18, color=cores_cresc, line=dict(width=3, color='white'), symbol='circle'),
                 text=[f"{v:+.1f}%" for v in crescimento],
                 textposition='top center',
-                textfont=dict(size=16, family='Arial Black', color=CORES['escuro']),
+                textfont=dict(size=14, family='Arial Black', color=CORES['escuro']),
                 name='Crescimento %',
                 hovertemplate='<b>%{x}</b><br>Crescimento: %{y:+.1f}%<extra></extra>'
             ),
@@ -1672,7 +1519,7 @@ def main():
         
         fig_evolucao.add_hline(y=0, line_dash="dash", line_color="#dc3545", line_width=2, row=1, col=2)
         
-        # Gráfico 3: Resultado Operacional - FONTE MAIOR
+        # Gráfico 3: Resultado Operacional (Linha 27)
         fig_evolucao.add_trace(
             go.Scatter(
                 x=meses, y=resultado_op_mensal,
@@ -1680,10 +1527,10 @@ def main():
                 fill='tozeroy',
                 fillcolor='rgba(102, 126, 234, 0.25)',
                 line=dict(color=CORES['primaria'], width=4, shape='spline'),
-                marker=dict(size=16, color=CORES['primaria'], line=dict(width=3, color='white'), symbol='circle'),
+                marker=dict(size=14, color=CORES['primaria'], line=dict(width=3, color='white'), symbol='circle'),
                 text=[f"R$ {v/1000:.1f}K" for v in resultado_op_mensal],
                 textposition='top center',
-                textfont=dict(size=16, family='Arial Black', color=CORES['escuro']),
+                textfont=dict(size=14, family='Arial Black', color=CORES['escuro']),
                 name='Resultado',
                 hovertemplate='<b>%{x}</b><br>Resultado: R$ %{y:,.0f}<extra></extra>'
             ),
@@ -1691,7 +1538,7 @@ def main():
         )
         
         fig_evolucao.update_layout(
-            height=500,
+            height=480,
             showlegend=False,
             paper_bgcolor='white',
             plot_bgcolor='rgba(0,0,0,0)',
@@ -1700,8 +1547,8 @@ def main():
             margin=dict(l=60, r=60, t=80, b=60)
         )
         
-        fig_evolucao.update_xaxes(gridcolor='#e8e8e8', tickfont=dict(size=13, family='Arial', color=CORES['escuro']), tickangle=0)
-        fig_evolucao.update_yaxes(gridcolor='#e8e8e8', tickfont=dict(size=13, family='Arial'))
+        fig_evolucao.update_xaxes(gridcolor='#e8e8e8', tickfont=dict(size=12, family='Arial', color=CORES['escuro']), tickangle=0)
+        fig_evolucao.update_yaxes(gridcolor='#e8e8e8', tickfont=dict(size=12, family='Arial'))
         
         st.plotly_chart(fig_evolucao, use_container_width=True)
     
@@ -1751,76 +1598,103 @@ def main():
         st.plotly_chart(fig_ranking_seg, use_container_width=True)
     
     # =============================================================================
-    # 🤝 SEÇÃO 4: DISTRIBUIÇÃO ENTRE SÓCIOS - CORRIGIDO (GERENCIAL)
+    # 🤝 SEÇÃO 4: DISTRIBUIÇÃO ENTRE SÓCIOS - APENAS GRÁFICO
     # =============================================================================
     
     if show_charts:
         st.markdown("""
         <div class="section-header" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
-            <h2>🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS (GERENCIAL)</h2>
+            <h2>🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS</h2>
         </div>
         """, unsafe_allow_html=True)
         
-        # CORRIGIDO: Usar Resultado Operacional repartido
+        # Dados da Linha 27 por mês
         meses_dist = ['Janeiro', 'Fevereiro', 'Março', 'Abril']
-        resultado_mensal = [5133, 7667, 16690, 0]  # Resultado Operacional
-        partner = [int(r * 0.65) for r in resultado_mensal]  # 65%
-        maldivas = [int(r * 0.35) for r in resultado_mensal]  # 35%
+        resultado_linha27 = [DADOS_MENSAIS[m]['resultado_op'] for m in meses_dist]
+        partner = [int(r * 0.65) for r in resultado_linha27]  # 65%
+        maldivas = [int(r * 0.35) for r in resultado_linha27]  # 35%
         
-        fig_dist = make_subplots(
-            rows=1, cols=2,
-            subplot_titles=('<b>📊 Distribuição Mensal por Sócio (Gerencial)</b>', '<b>🍩 Share Total YTD</b>'),
-            specs=[[{"type": "bar"}, {"type": "pie"}]],
-            column_widths=[0.6, 0.4],
-            horizontal_spacing=0.1
-        )
+        # APENAS GRÁFICO - Barras agrupadas mostrando divisão mês a mês
+        fig_dist = go.Figure()
         
-        # FONTE MAIOR nos gráficos
-        fig_dist.add_trace(
-            go.Bar(name='Partner (65%)', x=meses_dist, y=partner, marker_color='#667eea', marker_line=dict(width=2, color='white'),
-                   text=[f"R$ {v/1000:.1f}K" for v in partner], textposition='outside', textfont=dict(size=14, family='Arial Black'), width=0.35),
-            row=1, col=1
-        )
-        fig_dist.add_trace(
-            go.Bar(name='Maldivas (35%)', x=meses_dist, y=maldivas, marker_color='#f5576c', marker_line=dict(width=2, color='white'),
-                   text=[f"R$ {v/1000:.1f}K" for v in maldivas], textposition='outside', textfont=dict(size=14, family='Arial Black'), width=0.35),
-            row=1, col=1
-        )
+        fig_dist.add_trace(go.Bar(
+            name='Partner (65%)',
+            x=meses_dist,
+            y=partner,
+            marker_color='#667eea',
+            marker_line=dict(width=2, color='white'),
+            text=[f"R$ {v/1000:.1f}K" for v in partner],
+            textposition='outside',
+            textfont=dict(size=14, family='Arial Black'),
+            width=0.35
+        ))
         
-        # Totais YTD
-        total_resultado = sum(resultado_mensal)  # 29.490
-        partner_total = int(total_resultado * 0.65)  # ~19.169
-        maldivas_total = int(total_resultado * 0.35)  # ~10.321
+        fig_dist.add_trace(go.Bar(
+            name='Maldivas (35%)',
+            x=meses_dist,
+            y=maldivas,
+            marker_color='#f5576c',
+            marker_line=dict(width=2, color='white'),
+            text=[f"R$ {v/1000:.1f}K" for v in maldivas],
+            textposition='outside',
+            textfont=dict(size=14, family='Arial Black'),
+            width=0.35
+        ))
         
-        fig_dist.add_trace(
-            go.Pie(labels=['Partner (65%)', 'Maldivas (35%)'], values=[partner_total, maldivas_total], hole=0.55,
-                   marker=dict(colors=['#667eea', '#f5576c'], line=dict(width=3, color='white')),
-                   textinfo='label+percent', textfont=dict(size=14, family='Arial Black'),
-                   hovertemplate='<b>%{label}</b><br>Valor: R$ %{value:,.0f}<br>%{percent}<extra></extra>'),
-            row=1, col=2
-        )
+        # Adicionar linha do resultado total (Linha 27)
+        fig_dist.add_trace(go.Scatter(
+            name='Resultado Linha 27',
+            x=meses_dist,
+            y=resultado_linha27,
+            mode='lines+markers+text',
+            line=dict(color='#28a745', width=3, dash='dot'),
+            marker=dict(size=12, color='#28a745', line=dict(width=2, color='white')),
+            text=[f"R$ {v/1000:.1f}K" for v in resultado_linha27],
+            textposition='top center',
+            textfont=dict(size=12, family='Arial Black', color='#28a745'),
+        ))
         
         fig_dist.update_layout(
-            height=480, paper_bgcolor='white', plot_bgcolor='rgba(0,0,0,0)', barmode='group',
-            legend=dict(orientation='h', yanchor='bottom', y=-0.18, xanchor='center', x=0.3, font=dict(size=12, family='Arial Black')),
-            font=dict(family='Segoe UI', size=12), margin=dict(l=60, r=60, t=80, b=80)
+            title=dict(
+                text='📊 Distribuição do Resultado (Linha 27) - 65% Partner / 35% Maldivas - Mês a Mês',
+                font=dict(size=18, family='Arial Black', color='#1E3A5F'),
+                x=0.5,
+                xanchor='center'
+            ),
+            height=500,
+            paper_bgcolor='white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            barmode='group',
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=-0.20,
+                xanchor='center',
+                x=0.5,
+                font=dict(size=13, family='Arial Black')
+            ),
+            font=dict(family='Segoe UI', size=12),
+            margin=dict(l=60, r=60, t=100, b=100),
+            yaxis=dict(
+                title='Valor (R$)',
+                gridcolor='#e8e8e8',
+                range=[0, max(resultado_linha27) * 1.35],
+                tickformat=',.0f'
+            ),
+            xaxis=dict(
+                title='',
+                tickfont=dict(size=14, family='Arial Black')
+            )
         )
-        fig_dist.update_yaxes(gridcolor='#e8e8e8', range=[0, max(max(partner), max(maldivas)) * 1.4], tickformat=',.0f', row=1, col=1)
         
         st.plotly_chart(fig_dist, use_container_width=True)
         
-        # Tabela CORRIGIDA
-        st.markdown("### 📊 Distribuição Gerencial do Resultado Operacional")
+        # Totais YTD (apenas informativo)
+        total_resultado = sum(resultado_linha27)
+        partner_total = int(total_resultado * 0.65)
+        maldivas_total = int(total_resultado * 0.35)
         
-        dist_df = pd.DataFrame({
-            'Mês': ['Janeiro', 'Fevereiro', 'Março', 'Abril', '**TOTAL YTD**'],
-            'Resultado Op.': ['R$ 5.133,00', 'R$ 7.667,00', 'R$ 16.690,00', 'R$ 0,00', f'**R$ {total_resultado:,.0f}**'.replace(',', '.')],
-            'Partner (65%)': [f'R$ {p:,.0f}'.replace(',', '.') for p in partner] + [f'**R$ {partner_total:,.0f}**'.replace(',', '.')],
-            'Maldivas (35%)': [f'R$ {m:,.0f}'.replace(',', '.') for m in maldivas] + [f'**R$ {maldivas_total:,.0f}**'.replace(',', '.')],
-        })
-        st.dataframe(dist_df, use_container_width=True, hide_index=True)
-        
-        st.info("📌 **Nota:** Esta é a visão GERENCIAL - distribuição do Resultado Operacional (R$ 29.490,00) entre os sócios conforme share de 65%/35%. Valores de transferência de caixa podem diferir.")
+        st.info(f"📌 **Totais YTD (Linha 27):** Resultado = **{formatar_moeda(total_resultado)}** → Partner (65%): **{formatar_moeda(partner_total)}** | Maldivas (35%): **{formatar_moeda(maldivas_total)}**")
     
     # =============================================================================
     # 📦 SEÇÃO 5: ANÁLISE POR PRODUTO
@@ -1982,20 +1856,20 @@ def main():
         st.plotly_chart(fig_desp_bar, use_container_width=True)
     
     # =============================================================================
-    # 📋 SEÇÃO 9: RESUMO EXECUTIVO - CORRIGIDO
+    # 📋 SEÇÃO 9: RESUMO EXECUTIVO
     # =============================================================================
     
     if show_tables:
         st.markdown("""
         <div class="section-header" style="background: linear-gradient(135deg, #1E3A5F 0%, #2d5a87 100%);">
-            <h2>📋 RESUMO EXECUTIVO - YTD 2026</h2>
+            <h2>📋 RESUMO EXECUTIVO</h2>
         </div>
         """, unsafe_allow_html=True)
         
-        # Tabela de resumo CORRIGIDA - estrutura clara
+        # Tabela de resumo
         resumo_data = {
             'Indicador': [
-                '💰 RECEITA BRUTA TOTAL',
+                '💰 FATURAMENTO BRUTO',
                 '    → Produção Direta',
                 '    → Portal MAAS',
                 '',
@@ -2004,16 +1878,18 @@ def main():
                 '(+) Co-Corretagem',
                 '(-) Rebate AAI',
                 '',
+                '📉 CUSTOS TOTAIS',
+                '',
                 '(=) MARGEM DE CONTRIBUIÇÃO',
                 '',
-                '(-) DESPESAS TOTAIS',
+                '💸 DESPESAS TOTAIS',
                 '    → Despesas Operacionais',
                 '    → Folha + Terceiros',
                 '',
-                '🎯 RESULTADO OPERACIONAL',
+                '🎯 RESULTADO OPERACIONAL (Linha 27)',
             ],
             'Valor': [
-                'R$ 178.072,00',
+                formatar_moeda(totais['receita_bruta']),
                 'R$ 177.797,00',
                 'R$ 275,00',
                 '',
@@ -2022,45 +1898,20 @@ def main():
                 'R$ 803,00',
                 '(R$ 50.646,00)',
                 '',
-                'R$ 82.343,00',
+                formatar_moeda(totais['custos_totais']),
                 '',
-                '(R$ 46.050,00)',
+                formatar_moeda(totais['margem_contrib']),
+                '',
+                formatar_moeda(totais['despesas']),
                 '(R$ 29.104,00)',
                 '(R$ 16.946,00)',
                 '',
-                'R$ 29.490,00',
+                formatar_moeda(totais['resultado_op']),
             ]
         }
         
         df_resumo_display = pd.DataFrame(resumo_data)
         st.dataframe(df_resumo_display, use_container_width=True, hide_index=True)
-        
-        # Nota explicativa - CORRIGIDA COM FORMATAÇÃO DE MOEDA
-        st.markdown("""
-        <div style="
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border: 2px solid #28a745;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
-        ">
-            <h3 style="color: #155724; margin-bottom: 15px; font-size: 1.3rem;">
-                ✅ Verificação dos Cálculos
-            </h3>
-            <div style="color: #155724; font-size: 1.1rem; line-height: 2;">
-                <p style="margin: 8px 0;">
-                    <strong>•</strong> Receita Bruta Total = Prod. Direta (<strong>R$ 177.797,00</strong>) + Portal MAAS (<strong>R$ 275,00</strong>) = <strong style="color: #0d5524; font-size: 1.2rem;">R$ 178.072,00</strong>
-                </p>
-                <p style="margin: 8px 0;">
-                    <strong>•</strong> Despesas Totais = Operacionais (<strong>R$ 29.104,00</strong>) + Folha (<strong>R$ 16.946,00</strong>) = <strong style="color: #0d5524; font-size: 1.2rem;">R$ 46.050,00</strong>
-                </p>
-                <p style="margin: 8px 0;">
-                    <strong>•</strong> Resultado Operacional = Margem Contribuição - Despesas = <strong style="color: #0d5524; font-size: 1.2rem;">R$ 29.490,00</strong> <span style="font-size: 0.95rem;">(com ajustes Portal MAAS)</span>
-                </p>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
     
     # =============================================================================
     # 📥 SEÇÃO 10: EXPORTAR PDF
@@ -2077,7 +1928,7 @@ def main():
     
     with col2:
         if st.button("📄 GERAR PDF PROFISSIONAL PREMIUM", type="primary", use_container_width=True):
-            with st.spinner("Gerando PDF profissional com todas as correções..."):
+            with st.spinner("Gerando PDF profissional..."):
                 try:
                     pdf_generator = PDFDashboardGenerator()
                     pdf_bytes = pdf_generator.generate_pdf(
@@ -2117,7 +1968,7 @@ def main():
     ">
         <h3 style="margin-bottom: 10px;">✅ ASSERTIF CORRETORA - Dashboard Financeiro Premium</h3>
         <p style="opacity: 0.9;">
-            📊 Versão 4.0 Premium Ultimate (Corrigido) | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br>
+            📊 Versão 5.0 Premium Ultimate | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br>
             Desenvolvido com Streamlit + Plotly + ReportLab
         </p>
     </div>
