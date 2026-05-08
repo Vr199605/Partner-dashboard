@@ -101,6 +101,7 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], ic
         margin: 12px;
         min-width: 220px;
         border: 1px solid rgba(255,255,255,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     ">
         <div style="font-size: 2.5rem; margin-bottom: 8px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{icone}</div>
         <div style="font-size: 1rem; font-weight: 600; opacity: 1; margin-top: 8px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">{titulo}</div>
@@ -923,24 +924,22 @@ class PDFDashboardGenerator:
         elements.append(Spacer(1, 15))
         
         # KPIs CORRIGIDOS: A conta agora fecha
-        # Margem Contribuição (82.144) - Despesas (29.104) - Folha (16.946) = EBITDA/Resultado (36.094)
-        # Mas na planilha o Resultado Operacional é 29.490 (diferente do EBITDA)
         kpis = [
-            {'titulo': 'FATURAMENTO YTD', 'valor': 'R$ 178.072', 'subtitulo': 'Receita Bruta Total', 'icone': '💰'},
-            {'titulo': 'DESPESAS TOTAIS', 'valor': 'R$ 46.050', 'subtitulo': '29.104 + 16.946', 'icone': '💸'},
-            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 82.144', 'subtitulo': 'Após custos variáveis', 'icone': '📊'},
-            {'titulo': 'RESULTADO OPER.', 'valor': 'R$ 29.490', 'subtitulo': 'Lucro da Operação', 'icone': '🎯'},
+            {'titulo': 'FATURAMENTO YTD', 'valor': 'R$ 178.072,00', 'subtitulo': 'Receita Bruta Total', 'icone': '💰'},
+            {'titulo': 'DESPESAS TOTAIS', 'valor': 'R$ 46.050,00', 'subtitulo': 'R$ 29.104 + R$ 16.946', 'icone': '💸'},
+            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 82.144,00', 'subtitulo': 'Após custos variáveis', 'icone': '📊'},
+            {'titulo': 'RESULTADO OPER.', 'valor': 'R$ 29.490,00', 'subtitulo': 'Lucro da Operação', 'icone': '🎯'},
         ]
         elements.append(self._create_kpi_cards(kpis))
         elements.append(Spacer(1, 20))
         
-        # Nota explicativa dos KPIs - CORRIGIDA
+        # Nota explicativa dos KPIs - CORRIGIDA COM FONTE MAIOR
         elements.append(self._create_note_box(
             "📌 Nota sobre os KPIs",
-            "• <b>Faturamento YTD:</b> Soma da Receita Bruta Produção Direta (R$ 177.797) + Portal MAAS (R$ 275) = R$ 178.072<br/>"
-            "• <b>Despesas Totais:</b> Despesas Operacionais (R$ 29.104) + Folha e Terceiros (R$ 16.946) = R$ 46.050<br/>"
-            "• <b>Margem de Contribuição:</b> Receita após impostos, D.A., rebates e co-corretagem = R$ 82.144<br/>"
-            "• <b>Resultado Operacional:</b> Margem de Contribuição - Despesas Totais = R$ 29.490 (considerando ajustes Portal MAAS)"
+            "<font size='11'><b>💰 Faturamento YTD:</b> Soma da Receita Bruta Produção Direta (<b>R$ 177.797,00</b>) + Portal MAAS (<b>R$ 275,00</b>) = <b>R$ 178.072,00</b></font><br/><br/>"
+            "<font size='11'><b>💸 Despesas Totais:</b> Despesas Operacionais (<b>R$ 29.104,00</b>) + Folha e Terceiros (<b>R$ 16.946,00</b>) = <b>R$ 46.050,00</b></font><br/><br/>"
+            "<font size='11'><b>📊 Margem de Contribuição:</b> Receita após impostos, D.A., rebates e co-corretagem = <b>R$ 82.144,00</b></font><br/><br/>"
+            "<font size='11'><b>🎯 Resultado Operacional:</b> Margem de Contribuição - Despesas Totais = <b>R$ 29.490,00</b> (considerando ajustes Portal MAAS)</font>"
         ))
         elements.append(Spacer(1, 20))
         
@@ -959,10 +958,10 @@ class PDFDashboardGenerator:
         # Tabela de evolução - FONTE MAIOR
         evolucao_headers = ['Mês', 'Receita Bruta', 'Var. %', 'Resultado Op.', 'Margem']
         evolucao_data = [
-            ['Janeiro', 'R$ 42.263', '-', 'R$ 5.133', '12,1%'],
-            ['Fevereiro', 'R$ 49.513', '+17,2%', 'R$ 7.667', '15,5%'],
-            ['Março', 'R$ 71.946', '+45,3%', 'R$ 16.690', '23,2%'],
-            ['Abril', 'R$ 14.350', '-80,1%', 'R$ 0', '0%'],
+            ['Janeiro', 'R$ 42.263,00', '-', 'R$ 5.133,00', '12,1%'],
+            ['Fevereiro', 'R$ 49.513,00', '+17,2%', 'R$ 7.667,00', '15,5%'],
+            ['Março', 'R$ 71.946,00', '+45,3%', 'R$ 16.690,00', '23,2%'],
+            ['Abril', 'R$ 14.350,00', '-80,1%', 'R$ 0,00', '0%'],
         ]
         elements.append(self._create_data_table(evolucao_headers, evolucao_data, 
                                                  [3*cm, 4*cm, 3*cm, 4*cm, 3*cm],
@@ -1017,9 +1016,6 @@ class PDFDashboardGenerator:
         elements.append(Spacer(1, 15))
         
         # Gráfico de pizza - VALORES DO RESULTADO OPERACIONAL (não caixa)
-        # Resultado Operacional Total: 29.490
-        # Partner (65%): 19.169
-        # Maldivas (35%): 7.780  (nota: 19.169 + 7.780 = 26.949, não 29.490 - há diferença de Portal MAAS)
         partner_total = 19169
         maldivas_total = 7780
         elements.append(self._create_pie_chart(
@@ -1033,11 +1029,11 @@ class PDFDashboardGenerator:
         # Tabela CORRIGIDA: Resultado Operacional repartido entre sócios (GERENCIAL)
         dist_headers = ['Mês', 'Resultado Op.', 'Partner (65%)', 'Maldivas (35%)']
         dist_data = [
-            ['Janeiro', 'R$ 5.133', 'R$ 3.336', 'R$ 1.797'],
-            ['Fevereiro', 'R$ 7.667', 'R$ 4.984', 'R$ 2.683'],
-            ['Março', 'R$ 16.690', 'R$ 10.849', 'R$ 5.841'],
-            ['Abril', 'R$ 0', 'R$ 0', 'R$ 0'],
-            ['TOTAL YTD', 'R$ 29.490', 'R$ 19.169', 'R$ 10.321'],
+            ['Janeiro', 'R$ 5.133,00', 'R$ 3.336,00', 'R$ 1.797,00'],
+            ['Fevereiro', 'R$ 7.667,00', 'R$ 4.984,00', 'R$ 2.683,00'],
+            ['Março', 'R$ 16.690,00', 'R$ 10.849,00', 'R$ 5.841,00'],
+            ['Abril', 'R$ 0,00', 'R$ 0,00', 'R$ 0,00'],
+            ['TOTAL YTD', 'R$ 29.490,00', 'R$ 19.169,00', 'R$ 10.321,00'],
         ]
         elements.append(self._create_data_table(dist_headers, dist_data, 
                                                  [4*cm, 4.5*cm, 4.5*cm, 5*cm],
@@ -1186,11 +1182,11 @@ class PDFDashboardGenerator:
         # Box de análise - CORRIGIDO
         elements.append(self._create_note_box(
             "📊 Análise do Resultado",
-            "• A empresa apresenta resultado positivo com Resultado Operacional de R$ 29.490.<br/>"
-            "• <b>Receita Bruta Total:</b> R$ 178.072 (Prod. Direta: R$ 177.797 + Portal MAAS: R$ 275)<br/>"
-            "• <b>Despesas Totais:</b> R$ 46.050 (Operacionais: R$ 29.104 + Folha: R$ 16.946)<br/>"
+            "• A empresa apresenta resultado positivo com Resultado Operacional de <b>R$ 29.490,00</b>.<br/>"
+            "• <b>Receita Bruta Total:</b> R$ 178.072,00 (Prod. Direta: R$ 177.797,00 + Portal MAAS: R$ 275,00)<br/>"
+            "• <b>Despesas Totais:</b> R$ 46.050,00 (Operacionais: R$ 29.104,00 + Folha: R$ 16.946,00)<br/>"
             "• O Rebate AAI representa 28,5% da receita bruta, sendo o maior custo variável.<br/>"
-            "• A Margem de Contribuição de R$ 82.144 indica boa eficiência operacional.",
+            "• A Margem de Contribuição de R$ 82.144,00 indica boa eficiência operacional.",
             HexColor('#667eea')
         ))
         
@@ -1217,11 +1213,11 @@ class PDFDashboardGenerator:
         # Tabela comparativa - CORRIGIDA
         comp_headers = ['Indicador', 'Jan', 'Fev', 'Mar', 'Abr', 'YTD']
         comp_data = [
-            ['Receita Bruta', '42.263', '49.513', '71.946', '14.350', '178.072'],
-            ['Margem Contrib.', '20.373', '22.732', '32.237', '6.803', '82.144'],
-            ['Resultado Op.', '5.133', '7.667', '16.690', '0', '29.490'],
-            ['Partner (65%)', '3.336', '4.984', '10.849', '0', '19.169'],
-            ['Maldivas (35%)', '1.797', '2.683', '5.841', '0', '10.321'],
+            ['Receita Bruta', 'R$ 42.263', 'R$ 49.513', 'R$ 71.946', 'R$ 14.350', 'R$ 178.072'],
+            ['Margem Contrib.', 'R$ 20.373', 'R$ 22.732', 'R$ 32.237', 'R$ 6.803', 'R$ 82.144'],
+            ['Resultado Op.', 'R$ 5.133', 'R$ 7.667', 'R$ 16.690', 'R$ 0', 'R$ 29.490'],
+            ['Partner (65%)', 'R$ 3.336', 'R$ 4.984', 'R$ 10.849', 'R$ 0', 'R$ 19.169'],
+            ['Maldivas (35%)', 'R$ 1.797', 'R$ 2.683', 'R$ 5.841', 'R$ 0', 'R$ 10.321'],
         ]
         elements.append(self._create_data_table(comp_headers, comp_data, 
                                                  [4*cm, 2.5*cm, 2.5*cm, 2.5*cm, 2.5*cm, 4*cm],
@@ -1311,43 +1307,128 @@ def main():
         initial_sidebar_state="expanded"
     )
     
-    # CSS customizado
+    # CSS customizado PREMIUM - VISUAL INTERATIVO PERFEITO
     st.markdown("""
     <style>
+        /* Reset e Base */
+        .main .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        /* Header Principal */
         .main-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            padding: 40px 30px;
-            border-radius: 25px;
+            padding: 50px 40px;
+            border-radius: 30px;
             text-align: center;
-            margin-bottom: 35px;
-            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+            margin-bottom: 40px;
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.45);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
         }
         .main-header h1 {
             color: white;
-            font-size: 3rem;
+            font-size: 3.2rem;
             font-weight: 800;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            text-shadow: 3px 3px 8px rgba(0,0,0,0.35);
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
         }
         .main-header h2 {
             color: white;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: 500;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
         }
+        
+        /* Seções */
         .section-header {
-            padding: 20px 30px;
-            border-radius: 15px;
-            margin: 25px 0;
+            padding: 22px 35px;
+            border-radius: 18px;
+            margin: 30px 0;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .section-header:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.2);
         }
         .section-header h2 {
             color: white;
-            font-size: 1.6rem;
+            font-size: 1.7rem;
             font-weight: 700;
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
         }
+        
+        /* Cards de Métricas */
         .stMetric {
             background: linear-gradient(135deg, #667eea 0%, #667eeacc 100%);
-            padding: 20px;
-            border-radius: 15px;
+            padding: 25px;
+            border-radius: 20px;
             color: white;
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .stMetric:hover {
+            transform: scale(1.02);
+        }
+        
+        /* DataFrames/Tabelas */
+        .stDataFrame {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* Botões */
+        .stButton > button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        .stButton > button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+        
+        /* Gráficos Plotly - Container */
+        .js-plotly-plot {
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+        
+        /* Info boxes */
+        .stAlert {
+            border-radius: 15px;
+            border-left-width: 6px;
+        }
+        
+        /* Expanders */
+        .streamlit-expanderHeader {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1E3A5F;
         }
     </style>
     """, unsafe_allow_html=True)
@@ -1468,8 +1549,6 @@ def main():
     """, unsafe_allow_html=True)
     
     # KPIs - Valores CORRIGIDOS conforme planilha
-    # A conta: Margem Contrib (82.144) - Despesas (29.104) - Folha (16.946) = 36.094 (EBITDA)
-    # Mas Resultado Operacional = 29.490 (inclui ajustes Portal MAAS)
     faturamento_ytd = 178072
     despesas_total = 46050  # 29.104 + 16.946
     margem_contrib = 82144
@@ -1481,7 +1560,7 @@ def main():
         st.markdown(criar_cartao_kpi_html("FATURAMENTO YTD", formatar_moeda(faturamento_ytd), "Receita Bruta Total", "#667eea", "💰"), unsafe_allow_html=True)
     
     with col2:
-        st.markdown(criar_cartao_kpi_html("DESPESAS TOTAIS", formatar_moeda(despesas_total), "29.104 + 16.946", "#dc3545", "💸"), unsafe_allow_html=True)
+        st.markdown(criar_cartao_kpi_html("DESPESAS TOTAIS", formatar_moeda(despesas_total), "R$ 29.104 + R$ 16.946", "#dc3545", "💸"), unsafe_allow_html=True)
     
     with col3:
         st.markdown(criar_cartao_kpi_html("MARGEM CONTRIB.", formatar_moeda(margem_contrib), "Após custos variáveis", "#17a2b8", "📊"), unsafe_allow_html=True)
@@ -1489,14 +1568,46 @@ def main():
     with col4:
         st.markdown(criar_cartao_kpi_html("RESULTADO OPER.", formatar_moeda(resultado_op), "Lucro da Operação", "#28a745", "🎯"), unsafe_allow_html=True)
     
-    # Nota explicativa
+    # Nota explicativa dos KPIs - CORRIGIDA PARA MÁXIMA LEGIBILIDADE
     st.markdown("""
-    <div style="background: #e8f4f8; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0; border-radius: 5px;">
-        <b>📌 Nota sobre os KPIs:</b><br/>
-        • <b>Faturamento:</b> Prod. Direta (R$ 177.797) + Portal MAAS (R$ 275) = R$ 178.072<br/>
-        • <b>Despesas:</b> Operacionais (R$ 29.104) + Folha/Terceiros (R$ 16.946) = R$ 46.050<br/>
-        • <b>Cálculo:</b> Margem Contrib. (R$ 82.144) - Despesas (R$ 46.050) = R$ 36.094 (EBITDA Prod. Direta)<br/>
-        • <b>Resultado Operacional:</b> R$ 29.490 (considera ajustes e Portal MAAS)
+    <div style="
+        background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+        border: 3px solid #17a2b8;
+        border-left: 8px solid #17a2b8;
+        border-radius: 15px;
+        padding: 25px 30px;
+        margin: 25px 0;
+        box-shadow: 0 10px 30px rgba(23, 162, 184, 0.15);
+    ">
+        <h3 style="
+            color: #0c5460;
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        ">
+            📌 Nota sobre os KPIs
+        </h3>
+        <div style="color: #1a1a1a; font-size: 1.1rem; line-height: 2.2;">
+            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(102, 126, 234, 0.1); border-radius: 10px; border-left: 4px solid #667eea;">
+                <strong style="color: #667eea; font-size: 1.15rem;">💰 Faturamento YTD:</strong> 
+                <span style="color: #1E3A5F;">Soma da Receita Bruta Produção Direta (<strong>R$ 177.797,00</strong>) + Portal MAAS (<strong>R$ 275,00</strong>) = <strong style="color: #28a745; font-size: 1.2rem;">R$ 178.072,00</strong></span>
+            </p>
+            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(220, 53, 69, 0.1); border-radius: 10px; border-left: 4px solid #dc3545;">
+                <strong style="color: #dc3545; font-size: 1.15rem;">💸 Despesas Totais:</strong> 
+                <span style="color: #1E3A5F;">Despesas Operacionais (<strong>R$ 29.104,00</strong>) + Folha e Terceiros (<strong>R$ 16.946,00</strong>) = <strong style="color: #dc3545; font-size: 1.2rem;">R$ 46.050,00</strong></span>
+            </p>
+            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(23, 162, 184, 0.1); border-radius: 10px; border-left: 4px solid #17a2b8;">
+                <strong style="color: #17a2b8; font-size: 1.15rem;">📊 Margem de Contribuição:</strong> 
+                <span style="color: #1E3A5F;">Receita após impostos, D.A., rebates e co-corretagem = <strong style="color: #17a2b8; font-size: 1.2rem;">R$ 82.144,00</strong></span>
+            </p>
+            <p style="margin: 12px 0; padding: 12px 15px; background: rgba(40, 167, 69, 0.1); border-radius: 10px; border-left: 4px solid #28a745;">
+                <strong style="color: #28a745; font-size: 1.15rem;">🎯 Resultado Operacional:</strong> 
+                <span style="color: #1E3A5F;">Margem de Contribuição - Despesas Totais = <strong style="color: #28a745; font-size: 1.2rem;">R$ 29.490,00</strong> <em style="font-size: 0.95rem;">(considerando ajustes Portal MAAS)</em></span>
+            </p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -1534,7 +1645,7 @@ def main():
                 marker=dict(color=receita_bruta, colorscale='Viridis', showscale=False, line=dict(width=2, color='white')),
                 text=[f"R$ {v/1000:.1f}K" for v in receita_bruta],
                 textposition='outside',
-                textfont=dict(size=16, color=CORES['escuro'], family='Arial Black'),  # FONTE MAIOR
+                textfont=dict(size=16, color=CORES['escuro'], family='Arial Black'),
                 name='Receita Bruta',
                 hovertemplate='<b>%{x}</b><br>Receita: R$ %{y:,.0f}<extra></extra>',
                 width=0.6
@@ -1552,7 +1663,7 @@ def main():
                 marker=dict(size=20, color=cores_cresc, line=dict(width=3, color='white'), symbol='circle'),
                 text=[f"{v:+.1f}%" for v in crescimento],
                 textposition='top center',
-                textfont=dict(size=16, family='Arial Black', color=CORES['escuro']),  # FONTE MAIOR
+                textfont=dict(size=16, family='Arial Black', color=CORES['escuro']),
                 name='Crescimento %',
                 hovertemplate='<b>%{x}</b><br>Crescimento: %{y:+.1f}%<extra></extra>'
             ),
@@ -1572,7 +1683,7 @@ def main():
                 marker=dict(size=16, color=CORES['primaria'], line=dict(width=3, color='white'), symbol='circle'),
                 text=[f"R$ {v/1000:.1f}K" for v in resultado_op_mensal],
                 textposition='top center',
-                textfont=dict(size=16, family='Arial Black', color=CORES['escuro']),  # FONTE MAIOR
+                textfont=dict(size=16, family='Arial Black', color=CORES['escuro']),
                 name='Resultado',
                 hovertemplate='<b>%{x}</b><br>Resultado: R$ %{y:,.0f}<extra></extra>'
             ),
@@ -1584,7 +1695,7 @@ def main():
             showlegend=False,
             paper_bgcolor='white',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family='Segoe UI', size=14, color=CORES['escuro']),  # FONTE MAIOR
+            font=dict(family='Segoe UI', size=14, color=CORES['escuro']),
             hoverlabel=dict(bgcolor='white', font_size=14, bordercolor='#667eea'),
             margin=dict(l=60, r=60, t=80, b=60)
         )
@@ -1703,13 +1814,13 @@ def main():
         
         dist_df = pd.DataFrame({
             'Mês': ['Janeiro', 'Fevereiro', 'Março', 'Abril', '**TOTAL YTD**'],
-            'Resultado Op.': ['R$ 5.133', 'R$ 7.667', 'R$ 16.690', 'R$ 0', f'**R$ {total_resultado:,.0f}**'],
-            'Partner (65%)': [f'R$ {p:,.0f}' for p in partner] + [f'**R$ {partner_total:,.0f}**'],
-            'Maldivas (35%)': [f'R$ {m:,.0f}' for m in maldivas] + [f'**R$ {maldivas_total:,.0f}**'],
+            'Resultado Op.': ['R$ 5.133,00', 'R$ 7.667,00', 'R$ 16.690,00', 'R$ 0,00', f'**R$ {total_resultado:,.0f}**'.replace(',', '.')],
+            'Partner (65%)': [f'R$ {p:,.0f}'.replace(',', '.') for p in partner] + [f'**R$ {partner_total:,.0f}**'.replace(',', '.')],
+            'Maldivas (35%)': [f'R$ {m:,.0f}'.replace(',', '.') for m in maldivas] + [f'**R$ {maldivas_total:,.0f}**'.replace(',', '.')],
         })
         st.dataframe(dist_df, use_container_width=True, hide_index=True)
         
-        st.info("📌 **Nota:** Esta é a visão GERENCIAL - distribuição do Resultado Operacional (R$ 29.490) entre os sócios conforme share de 65%/35%. Valores de transferência de caixa podem diferir.")
+        st.info("📌 **Nota:** Esta é a visão GERENCIAL - distribuição do Resultado Operacional (R$ 29.490,00) entre os sócios conforme share de 65%/35%. Valores de transferência de caixa podem diferir.")
     
     # =============================================================================
     # 📦 SEÇÃO 5: ANÁLISE POR PRODUTO
@@ -1924,13 +2035,32 @@ def main():
         df_resumo_display = pd.DataFrame(resumo_data)
         st.dataframe(df_resumo_display, use_container_width=True, hide_index=True)
         
-        # Nota explicativa
-        st.success("""
-        **✅ Verificação dos Cálculos:**
-        - Receita Bruta Total = Prod. Direta (R$ 177.797) + Portal MAAS (R$ 275) = **R$ 178.072**
-        - Despesas Totais = Operacionais (R$ 29.104) + Folha (R$ 16.946) = **R$ 46.050**
-        - Resultado Operacional = Margem Contribuição - Despesas = **R$ 29.490** (com ajustes Portal MAAS)
-        """)
+        # Nota explicativa - CORRIGIDA COM FORMATAÇÃO DE MOEDA
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        ">
+            <h3 style="color: #155724; margin-bottom: 15px; font-size: 1.3rem;">
+                ✅ Verificação dos Cálculos
+            </h3>
+            <div style="color: #155724; font-size: 1.1rem; line-height: 2;">
+                <p style="margin: 8px 0;">
+                    <strong>•</strong> Receita Bruta Total = Prod. Direta (<strong>R$ 177.797,00</strong>) + Portal MAAS (<strong>R$ 275,00</strong>) = <strong style="color: #0d5524; font-size: 1.2rem;">R$ 178.072,00</strong>
+                </p>
+                <p style="margin: 8px 0;">
+                    <strong>•</strong> Despesas Totais = Operacionais (<strong>R$ 29.104,00</strong>) + Folha (<strong>R$ 16.946,00</strong>) = <strong style="color: #0d5524; font-size: 1.2rem;">R$ 46.050,00</strong>
+                </p>
+                <p style="margin: 8px 0;">
+                    <strong>•</strong> Resultado Operacional = Margem Contribuição - Despesas = <strong style="color: #0d5524; font-size: 1.2rem;">R$ 29.490,00</strong> <span style="font-size: 0.95rem;">(com ajustes Portal MAAS)</span>
+                </p>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
     
     # =============================================================================
     # 📥 SEÇÃO 10: EXPORTAR PDF
