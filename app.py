@@ -46,24 +46,24 @@ from reportlab.pdfbase.ttfonts import TTFont
 warnings.filterwarnings('ignore')
 
 # =============================================================================
-# 🎨 CONFIGURAÇÕES DE ESTILO PREMIUM OSCAR EDITION
+# 🎨 CONFIGURAÇÕES DE ESTILO PREMIUM - PALETA AZUL MALDIVAS
 # =============================================================================
 
-# Paleta de cores profissional - Atualizada para visual Oscar
+# Paleta de cores profissional - Tons de Azul Maldivas Holding
 CORES = {
-    'primaria': '#667eea',
-    'secundaria': '#764ba2',
+    'primaria': '#0a1628',
+    'secundaria': '#1a3a5c',
     'sucesso': '#00d4aa',
     'perigo': '#ff6b6b',
     'alerta': '#feca57',
-    'info': '#54a0ff',
-    'escuro': '#1a1a2e',
+    'info': '#2e86ab',
+    'escuro': '#0a1628',
     'claro': '#f8f9fa',
     'ouro': '#ffd700',
     'prata': '#c0c0c0',
     'bronze': '#cd7f32',
-    'gradiente': ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
-    'chart_colors': ['#667eea', '#00d4aa', '#ff6b6b', '#feca57', '#54a0ff', '#764ba2', '#00f2fe', '#f093fb']
+    'gradiente': ['#0a1628', '#1a3a5c', '#2e86ab', '#4ea8de', '#7dd3fc', '#bae6fd'],
+    'chart_colors': ['#0a1628', '#1a3a5c', '#2e86ab', '#4ea8de', '#00d4aa', '#7dd3fc', '#bae6fd', '#e0f2fe']
 }
 
 # Paletas para gráficos
@@ -309,7 +309,7 @@ def extrair_dados_dre(df_dre):
 
 
 def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], icone="📊", tamanho="normal"):
-    """Cria HTML para cartão de KPI estilizado - VERSÃO OSCAR"""
+    """Cria HTML para cartão de KPI estilizado - VERSÃO AZUL MALDIVAS"""
     
     # Tamanhos responsivos
     if tamanho == "grande":
@@ -403,11 +403,11 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], ic
 
 
 # =============================================================================
-# 📄 CLASSE PARA GERAÇÃO DE PDF COM REPORTLAB - VERSÃO OSCAR
+# 📄 CLASSE PARA GERAÇÃO DE PDF COM REPORTLAB - VERSÃO AZUL MALDIVAS
 # =============================================================================
 
 class PDFDashboardGenerator:
-    """Classe para gerar PDF profissional do dashboard - Versão Oscar"""
+    """Classe para gerar PDF profissional do dashboard - Versão Azul Maldivas"""
     
     def __init__(self, filename="Assertif_Dashboard_Premium.pdf"):
         self.filename = filename
@@ -464,7 +464,7 @@ class PDFDashboardGenerator:
             name='SectionTitle',
             parent=self.styles['Heading2'],
             fontSize=16,
-            textColor=HexColor('#1a1a2e'),
+            textColor=HexColor('#0a1628'),
             alignment=TA_LEFT,
             spaceAfter=12,
             spaceBefore=20,
@@ -475,7 +475,7 @@ class PDFDashboardGenerator:
             name='NormalText',
             parent=self.styles['Normal'],
             fontSize=10,
-            textColor=HexColor('#1a1a2e'),
+            textColor=HexColor('#0a1628'),
             alignment=TA_LEFT,
             spaceAfter=6,
             fontName='Helvetica'
@@ -485,7 +485,7 @@ class PDFDashboardGenerator:
             name='TOCEntry',
             parent=self.styles['Normal'],
             fontSize=12,
-            textColor=HexColor('#1a1a2e'),
+            textColor=HexColor('#0a1628'),
             alignment=TA_LEFT,
             spaceAfter=8,
             fontName='Helvetica',
@@ -547,7 +547,7 @@ class PDFDashboardGenerator:
             [Paragraph("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 
                       ParagraphStyle(name='LineCover', alignment=TA_CENTER, textColor=colors.white, fontSize=14))],
             [Spacer(1, 0.5*cm)],
-            [Paragraph("Dashboard Financeiro Premium", self.styles['CoverSubtitle'])],
+            [Paragraph("Dashboard Financeiro", self.styles['CoverSubtitle'])],
             [Paragraph("Relatório Executivo | YTD 2026", self.styles['CoverSubtitle'])],
             [Spacer(1, 2*cm)],
             [Paragraph(f"📅 Período: Janeiro a Abril de 2026", 
@@ -561,7 +561,7 @@ class PDFDashboardGenerator:
         
         cover_table = Table([[item[0]] for item in cover_content], colWidths=[18*cm])
         cover_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#667eea')),
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#0a1628')),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('TOPPADDING', (0, 0), (-1, -1), 10),
@@ -581,8 +581,8 @@ class PDFDashboardGenerator:
         info_table = Table(info_data, colWidths=[5*cm, 4*cm, 5*cm, 4*cm])
         info_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f8f9fa')),
-            ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#1a1a2e')),
-            ('TEXTCOLOR', (2, 0), (2, -1), HexColor('#1a1a2e')),
+            ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#0a1628')),
+            ('TEXTCOLOR', (2, 0), (2, -1), HexColor('#0a1628')),
             ('TEXTCOLOR', (1, 0), (1, -1), HexColor('#00d4aa')),
             ('TEXTCOLOR', (3, 0), (3, -1), HexColor('#00d4aa')),
             ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
@@ -594,7 +594,7 @@ class PDFDashboardGenerator:
             ('TOPPADDING', (0, 0), (-1, -1), 12),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
             ('GRID', (0, 0), (-1, -1), 1, HexColor('#e8e8e8')),
-            ('BOX', (0, 0), (-1, -1), 2, HexColor('#667eea')),
+            ('BOX', (0, 0), (-1, -1), 2, HexColor('#0a1628')),
         ]))
         
         elements.append(info_table)
@@ -610,7 +610,7 @@ class PDFDashboardGenerator:
                                  ParagraphStyle(name='TOCHeader', alignment=TA_CENTER, fontSize=20, fontName='Helvetica-Bold'))]]
         toc_header_table = Table(toc_header, colWidths=[18*cm])
         toc_header_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#1a1a2e')),
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#0a1628')),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('TOPPADDING', (0, 0), (-1, -1), 20),
@@ -637,8 +637,8 @@ class PDFDashboardGenerator:
         toc_data = []
         for num, titulo, pagina in toc_items:
             toc_data.append([
-                Paragraph(f"<b>{num}</b>", ParagraphStyle(name='TOCNum', fontSize=12, textColor=HexColor('#667eea'), fontName='Helvetica-Bold')),
-                Paragraph(titulo, ParagraphStyle(name='TOCTitle', fontSize=12, textColor=HexColor('#1a1a2e'), fontName='Helvetica')),
+                Paragraph(f"<b>{num}</b>", ParagraphStyle(name='TOCNum', fontSize=12, textColor=HexColor('#1a3a5c'), fontName='Helvetica-Bold')),
+                Paragraph(titulo, ParagraphStyle(name='TOCTitle', fontSize=12, textColor=HexColor('#0a1628'), fontName='Helvetica')),
                 Paragraph(f"<b>{pagina}</b>", ParagraphStyle(name='TOCPage', fontSize=12, textColor=HexColor('#6c757d'), alignment=TA_RIGHT, fontName='Helvetica-Bold')),
             ])
         
@@ -651,7 +651,7 @@ class PDFDashboardGenerator:
             ('TOPPADDING', (0, 0), (-1, -1), 10),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
             ('LINEBELOW', (0, 0), (-1, -2), 0.5, HexColor('#e8e8e8')),
-            ('LINEBELOW', (0, -1), (-1, -1), 2, HexColor('#667eea')),
+            ('LINEBELOW', (0, -1), (-1, -1), 2, HexColor('#1a3a5c')),
         ]))
         
         elements.append(toc_table)
@@ -663,14 +663,14 @@ class PDFDashboardGenerator:
             "no período de Janeiro a Abril de 2026. Os dados incluem análise de receitas por seguradora, "
             "produto, originador e cliente, além da distribuição de resultados entre os sócios e "
             "evolução mensal dos principais indicadores.",
-            ParagraphStyle(name='InfoBox', fontSize=10, textColor=HexColor('#1a1a2e'), 
+            ParagraphStyle(name='InfoBox', fontSize=10, textColor=HexColor('#0a1628'), 
                           alignment=TA_JUSTIFY, fontName='Helvetica', leading=14)
         )]]
         
         info_box_table = Table(info_box, colWidths=[17*cm])
         info_box_table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, -1), HexColor('#e8f4f8')),
-            ('BOX', (0, 0), (-1, -1), 2, HexColor('#54a0ff')),
+            ('BOX', (0, 0), (-1, -1), 2, HexColor('#2e86ab')),
             ('TOPPADDING', (0, 0), (-1, -1), 15),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
             ('LEFTPADDING', (0, 0), (-1, -1), 15),
@@ -682,7 +682,7 @@ class PDFDashboardGenerator:
         
         return elements
     
-    def _create_section_header(self, titulo, cor=HexColor('#667eea'), icone="📊"):
+    def _create_section_header(self, titulo, cor=HexColor('#0a1628'), icone="📊"):
         """Cria cabeçalho de seção premium"""
         section_data = [[
             Paragraph(f"<font color='white'><b>{titulo}</b></font>", 
@@ -705,9 +705,9 @@ class PDFDashboardGenerator:
         kpi_cells = []
         
         cores_kpi = [
-            HexColor('#667eea'),
+            HexColor('#0a1628'),
             HexColor('#ff6b6b'),
-            HexColor('#54a0ff'),
+            HexColor('#2e86ab'),
             HexColor('#feca57'),
             HexColor('#00d4aa'),
         ]
@@ -766,10 +766,10 @@ class PDFDashboardGenerator:
         lc.valueAxis.valueMax = max(data) * 1.2 if data else 100
         lc.valueAxis.labels.fontName = 'Helvetica'
         lc.valueAxis.labels.fontSize = 8
-        lc.lines[0].strokeColor = HexColor('#667eea')
+        lc.lines[0].strokeColor = HexColor('#0a1628')
         lc.lines[0].strokeWidth = 3
         lc.lines[0].symbol = makeMarker('Circle')
-        lc.lines[0].symbol.fillColor = HexColor('#667eea')
+        lc.lines[0].symbol.fillColor = HexColor('#1a3a5c')
         lc.lines[0].symbol.strokeColor = colors.white
         lc.lines[0].symbol.strokeWidth = 2
         lc.lines[0].symbol.size = 8
@@ -778,7 +778,7 @@ class PDFDashboardGenerator:
         
         drawing.add(String(width/2, height - 15, title, 
                           fontName='Helvetica-Bold', fontSize=11, textAnchor='middle',
-                          fillColor=HexColor('#1a1a2e')))
+                          fillColor=HexColor('#0a1628')))
         
         return drawing
     
@@ -792,7 +792,7 @@ class PDFDashboardGenerator:
         table = Table(table_data, colWidths=col_widths)
         
         style_commands = [
-            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#667eea')),
+            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#0a1628')),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('FONTSIZE', (0, 0), (-1, 0), 10),
@@ -805,7 +805,7 @@ class PDFDashboardGenerator:
             ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
             ('FONTSIZE', (0, 1), (-1, -1), 9),
             ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#e8e8e8')),
-            ('BOX', (0, 0), (-1, -1), 1.5, HexColor('#667eea')),
+            ('BOX', (0, 0), (-1, -1), 1.5, HexColor('#0a1628')),
         ]
         
         for i in range(1, len(table_data)):
@@ -824,11 +824,11 @@ class PDFDashboardGenerator:
         
         return table
     
-    def _create_note_box(self, titulo, texto, cor=HexColor('#54a0ff')):
+    def _create_note_box(self, titulo, texto, cor=HexColor('#2e86ab')):
         """Cria box de nota explicativa"""
         note_content = [[Paragraph(
             f"<b>{titulo}</b><br/><br/>{texto}",
-            ParagraphStyle(name='NoteContent', fontSize=9, textColor=HexColor('#1a1a2e'), 
+            ParagraphStyle(name='NoteContent', fontSize=9, textColor=HexColor('#0a1628'), 
                           alignment=TA_JUSTIFY, fontName='Helvetica', leading=12)
         )]]
         
@@ -848,8 +848,8 @@ class PDFDashboardGenerator:
         """Cria rodapé do documento"""
         footer_data = [[
             Paragraph(
-                "<font color='white'><b>✅ ASSERTIF CORRETORA - Dashboard Financeiro Premium</b><br/>"
-                f"📊 Versão 6.0 Oscar Edition | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>"
+                "<font color='white'><b>✅ ASSERTIF CORRETORA - Dashboard Financeiro</b><br/>"
+                f"📊 Versão 6.0 | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>"
                 f"Documento gerado automaticamente em {datetime.now().strftime('%d/%m/%Y às %H:%M')}</font>",
                 ParagraphStyle(
                     name='FooterStyle',
@@ -863,7 +863,7 @@ class PDFDashboardGenerator:
         
         footer_table = Table(footer_data, colWidths=[18*cm])
         footer_table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#1a1a2e')),
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#0a1628')),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('TOPPADDING', (0, 0), (-1, -1), 20),
@@ -878,15 +878,15 @@ class PDFDashboardGenerator:
         """Adiciona número de página e cabeçalho/rodapé em cada página"""
         canvas.saveState()
         
-        canvas.setFillColor(HexColor('#667eea'))
+        canvas.setFillColor(HexColor('#0a1628'))
         canvas.rect(1*cm, A4[1] - 1.5*cm, A4[0] - 2*cm, 0.8*cm, fill=True, stroke=False)
         
         canvas.setFillColor(colors.white)
         canvas.setFont('Helvetica-Bold', 9)
-        canvas.drawString(1.5*cm, A4[1] - 1.1*cm, "📊 ASSERTIF CORRETORA - Dashboard Financeiro Premium")
+        canvas.drawString(1.5*cm, A4[1] - 1.1*cm, "📊 ASSERTIF CORRETORA - Dashboard Financeiro")
         canvas.drawRightString(A4[0] - 1.5*cm, A4[1] - 1.1*cm, f"YTD 2026")
         
-        canvas.setFillColor(HexColor('#1a1a2e'))
+        canvas.setFillColor(HexColor('#0a1628'))
         canvas.rect(1*cm, 0.5*cm, A4[0] - 2*cm, 0.6*cm, fill=True, stroke=False)
         
         canvas.setFillColor(colors.white)
@@ -916,7 +916,7 @@ class PDFDashboardGenerator:
         elements.extend(self._create_cover_page())
         elements.extend(self._create_table_of_contents())
         
-        elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs)", HexColor('#667eea')))
+        elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs)", HexColor('#0a1628')))
         elements.append(Spacer(1, 15))
         
         kpis = [
@@ -924,7 +924,7 @@ class PDFDashboardGenerator:
             {'titulo': 'CUSTOS TOTAIS', 'valor': 'R$ 96.939', 'subtitulo': 'Impostos+DA+Rebate', 'icone': '📉'},
             {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 83.858', 'subtitulo': 'Fat-Custos', 'icone': '📊'},
             {'titulo': 'DESPESAS', 'valor': 'R$ 63.066', 'subtitulo': 'Oper.+Folha', 'icone': '💸'},
-            {'titulo': 'RESULTADO', 'valor': 'R$ 20.791', 'subtitulo': 'Linha 27', 'icone': '🎯'},
+            {'titulo': 'RESULTADO', 'valor': 'R$ 20.791', 'subtitulo': 'Resultado Final', 'icone': '🎯'},
         ]
         elements.append(self._create_kpi_cards(kpis))
         elements.append(Spacer(1, 20))
@@ -935,11 +935,11 @@ class PDFDashboardGenerator:
             "<b>📉 Custos Totais:</b> Soma de Impostos Diretos, Custo Operacional (D.A.) e Rebate AAI, menos Co-corretagem<br/><br/>"
             "<b>📊 Margem de Contribuição:</b> Faturamento Bruto menos Custos Totais<br/><br/>"
             "<b>💸 Despesas Totais:</b> Soma de Despesas Operacionais e Folha + Terceiros<br/><br/>"
-            "<b>🎯 Resultado Operacional:</b> Margem de Contribuição menos Despesas Totais (conforme Linha 27 da DRE)"
+            "<b>🎯 Resultado Operacional:</b> Margem de Contribuição menos Despesas Totais"
         ))
         elements.append(Spacer(1, 20))
         
-        elements.append(self._create_section_header("📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO", HexColor('#00d4aa')))
+        elements.append(self._create_section_header("📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO", HexColor('#1a3a5c')))
         elements.append(Spacer(1, 15))
         
         meses = ['Jan', 'Fev', 'Mar', 'Abr']
@@ -971,23 +971,23 @@ class PDFDashboardGenerator:
 
 
 # =============================================================================
-# 🎯 APLICAÇÃO STREAMLIT PRINCIPAL - VERSÃO OSCAR EDITION
+# 🎯 APLICAÇÃO STREAMLIT PRINCIPAL - VERSÃO AZUL MALDIVAS
 # =============================================================================
 
 def main():
     # Configuração da página
     st.set_page_config(
-        page_title="Assertif Corretora - Dashboard Premium Oscar",
-        page_icon="🏆",
+        page_title="Assertif Corretora - Dashboard Financeiro",
+        page_icon="📊",
         layout="wide",
         initial_sidebar_state="expanded"
     )
     
-    # CSS customizado PREMIUM OSCAR EDITION - VISUAL INOVADOR
+    # CSS customizado - PALETA AZUL MALDIVAS
     st.markdown("""
     <style>
         /* ========================================
-           🎬 ASSERTIF DASHBOARD - OSCAR EDITION
+           🎬 ASSERTIF DASHBOARD - AZUL MALDIVAS
            ======================================== */
         
         /* Import Google Fonts */
@@ -1004,15 +1004,15 @@ def main():
         }
         
         /* ========================================
-           🎨 HEADER PRINCIPAL - CINEMA STYLE
+           🎨 HEADER PRINCIPAL - AZUL MALDIVAS
            ======================================== */
         .main-header {
             background: linear-gradient(135deg, 
-                #667eea 0%, 
-                #764ba2 25%, 
-                #f093fb 50%, 
-                #764ba2 75%, 
-                #667eea 100%);
+                #0a1628 0%, 
+                #1a3a5c 25%, 
+                #2e86ab 50%, 
+                #1a3a5c 75%, 
+                #0a1628 100%);
             background-size: 400% 400%;
             animation: gradientShift 8s ease infinite;
             padding: 60px 50px;
@@ -1020,8 +1020,8 @@ def main():
             text-align: center;
             margin-bottom: 50px;
             box-shadow: 
-                0 30px 80px rgba(102, 126, 234, 0.5),
-                0 15px 40px rgba(118, 75, 162, 0.3),
+                0 30px 80px rgba(10, 22, 40, 0.5),
+                0 15px 40px rgba(26, 58, 92, 0.3),
                 inset 0 2px 0 rgba(255,255,255,0.25);
             border: 2px solid rgba(255,255,255,0.2);
             position: relative;
@@ -1087,7 +1087,7 @@ def main():
         }
         
         /* ========================================
-           📊 SEÇÕES - VISUAL PREMIUM
+           📊 SEÇÕES - VISUAL AZUL MALDIVAS
            ======================================== */
         .section-header {
             padding: 28px 40px;
@@ -1130,15 +1130,15 @@ def main():
         }
         
         /* ========================================
-           💳 CARDS DE MÉTRICAS - GLASSMORPHISM
+           💳 CARDS DE MÉTRICAS - AZUL MALDIVAS
            ======================================== */
         .stMetric {
-            background: linear-gradient(145deg, #667eea 0%, #667eeadd 100%);
+            background: linear-gradient(145deg, #0a1628 0%, #0a1628dd 100%);
             padding: 30px;
             border-radius: 24px;
             color: white;
             box-shadow: 
-                0 20px 50px rgba(102, 126, 234, 0.35),
+                0 20px 50px rgba(10, 22, 40, 0.35),
                 inset 0 1px 0 rgba(255,255,255,0.2);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(255,255,255,0.15);
@@ -1147,7 +1147,7 @@ def main():
         .stMetric:hover {
             transform: translateY(-8px) scale(1.02);
             box-shadow: 
-                0 30px 70px rgba(102, 126, 234, 0.45),
+                0 30px 70px rgba(10, 22, 40, 0.45),
                 inset 0 1px 0 rgba(255,255,255,0.3);
         }
         
@@ -1160,7 +1160,7 @@ def main():
             box-shadow: 
                 0 15px 40px rgba(0,0,0,0.1),
                 0 5px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(10, 22, 40, 0.2);
         }
         
         .stDataFrame table {
@@ -1168,7 +1168,7 @@ def main():
         }
         
         .stDataFrame th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%) !important;
             color: white !important;
             font-weight: 700 !important;
             padding: 18px 15px !important;
@@ -1184,7 +1184,7 @@ def main():
            🔘 BOTÕES - CALL TO ACTION
            ======================================== */
         .stButton > button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);
             color: white;
             border: none;
             padding: 18px 50px;
@@ -1192,7 +1192,7 @@ def main():
             font-weight: 800;
             border-radius: 16px;
             box-shadow: 
-                0 15px 40px rgba(102, 126, 234, 0.45),
+                0 15px 40px rgba(10, 22, 40, 0.45),
                 inset 0 1px 0 rgba(255,255,255,0.2);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
@@ -1202,7 +1202,7 @@ def main():
         .stButton > button:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 
-                0 25px 60px rgba(102, 126, 234, 0.55),
+                0 25px 60px rgba(10, 22, 40, 0.55),
                 inset 0 1px 0 rgba(255,255,255,0.3);
         }
         
@@ -1238,7 +1238,7 @@ def main():
         .streamlit-expanderHeader {
             font-weight: 700;
             font-size: 1.15rem;
-            color: #1a1a2e;
+            color: #0a1628;
             padding: 15px 0;
         }
         
@@ -1257,12 +1257,12 @@ def main():
            🎯 FILTRO DE PERÍODO - DESTAQUE
            ======================================== */
         .filtro-periodo {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);
             padding: 25px 35px;
             border-radius: 20px;
             margin-bottom: 35px;
             box-shadow: 
-                0 15px 45px rgba(102, 126, 234, 0.35),
+                0 15px 45px rgba(10, 22, 40, 0.35),
                 inset 0 1px 0 rgba(255,255,255,0.2);
         }
         
@@ -1271,18 +1271,18 @@ def main():
            ======================================== */
         .legenda-box {
             background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            border: 3px solid #54a0ff;
-            border-left: 10px solid #54a0ff;
+            border: 3px solid #2e86ab;
+            border-left: 10px solid #2e86ab;
             border-radius: 20px;
             padding: 35px 40px;
             margin: 35px 0;
             box-shadow: 
-                0 15px 40px rgba(84, 160, 255, 0.15),
+                0 15px 40px rgba(46, 134, 171, 0.15),
                 0 5px 15px rgba(0,0,0,0.05);
         }
         
         .legenda-box h3 {
-            color: #0c5460;
+            color: #0a1628;
             margin-bottom: 25px;
             font-size: 1.5rem;
             font-weight: 800;
@@ -1349,12 +1349,12 @@ def main():
     """, unsafe_allow_html=True)
     
     # =========================================================================
-    # 🎬 HEADER PRINCIPAL - OSCAR STYLE
+    # 🎬 HEADER PRINCIPAL - AZUL MALDIVAS
     # =========================================================================
     st.markdown("""
     <div class="main-header">
         <h1>🏆 ASSERTIF CORRETORA</h1>
-        <h2>Dashboard Financeiro Premium | Oscar Edition 2026</h2>
+        <h2>Dashboard Financeiro</h2>
         <div class="badge">📊 YTD Janeiro - Abril 2026 • Versão 6.0</div>
     </div>
     """, unsafe_allow_html=True)
@@ -1366,7 +1366,7 @@ def main():
         st.markdown("""
         <div style="text-align: center; padding: 20px 0;">
             <span style="font-size: 3rem;">📊</span>
-            <h2 style="color: #667eea; margin: 15px 0 5px 0; font-weight: 800;">ASSERTIF</h2>
+            <h2 style="color: #0a1628; margin: 15px 0 5px 0; font-weight: 800;">ASSERTIF</h2>
             <p style="color: #6c757d; font-size: 0.9rem;">Dashboard Premium</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1391,14 +1391,14 @@ def main():
         
         st.markdown("""
         <div style="
-            background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+            background: linear-gradient(135deg, #0a162822 0%, #1a3a5c22 100%);
             padding: 20px;
             border-radius: 15px;
             text-align: center;
             margin-top: 20px;
         ">
-            <p style="font-size: 0.85rem; color: #667eea; margin: 0; font-weight: 600;">
-                ✨ Versão Oscar Edition<br/>
+            <p style="font-size: 0.85rem; color: #0a1628; margin: 0; font-weight: 600;">
+                ✨ Versão Premium<br/>
                 <span style="font-size: 0.75rem; color: #6c757d;">v6.0 • Maio 2026</span>
             </p>
         </div>
@@ -1409,11 +1409,11 @@ def main():
     # =========================================================================
     st.markdown("""
     <div style="
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);
         padding: 20px 35px;
         border-radius: 20px;
         margin-bottom: 35px;
-        box-shadow: 0 15px 45px rgba(102, 126, 234, 0.35);
+        box-shadow: 0 15px 45px rgba(10, 22, 40, 0.35);
     ">
         <h3 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 700;">
             🗓️ SELECIONE O PERÍODO DE ANÁLISE
@@ -1520,10 +1520,10 @@ def main():
     totais, meses_ativos = calcular_dados_filtrados(meses_selecionados, dados_mensais_atual)
     
     # =========================================================================
-    # 💰 SEÇÃO 1: KPIs PRINCIPAIS - OSCAR EDITION
+    # 💰 SEÇÃO 1: KPIs PRINCIPAIS - AZUL MALDIVAS
     # =========================================================================
     st.markdown("""
-    <div class="section-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="section-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);">
         <h2>💰 INDICADORES PRINCIPAIS (KPIs)</h2>
     </div>
     """, unsafe_allow_html=True)
@@ -1541,7 +1541,7 @@ def main():
             "FATURAMENTO", 
             formatar_moeda(faturamento), 
             "Receita Bruta Total", 
-            "#667eea", 
+            "#0a1628", 
             "💰"
         ), unsafe_allow_html=True)
     
@@ -1559,7 +1559,7 @@ def main():
             "MARGEM CONTRIB.", 
             formatar_moeda(margem_contrib), 
             "Faturamento - Custos", 
-            "#54a0ff", 
+            "#2e86ab", 
             "📊"
         ), unsafe_allow_html=True)
     
@@ -1578,7 +1578,7 @@ def main():
         st.markdown(criar_cartao_kpi_html(
             "RESULTADO OPER.", 
             formatar_moeda(resultado_op), 
-            "Linha 27 DRE", 
+            "Resultado Final", 
             cor_resultado, 
             icone_resultado
         ), unsafe_allow_html=True)
@@ -1589,17 +1589,17 @@ def main():
     st.markdown("""
     <div class="legenda-box">
         <h3>📌 Legenda dos Indicadores</h3>
-        <div style="color: #1a1a2e; font-size: 1.1rem; line-height: 2.2;">
-            <div class="legenda-item" style="background: rgba(102, 126, 234, 0.1); border-color: #667eea;">
-                <strong style="color: #667eea;">💰 Faturamento Bruto:</strong> 
+        <div style="color: #0a1628; font-size: 1.1rem; line-height: 2.2;">
+            <div class="legenda-item" style="background: rgba(10, 22, 40, 0.1); border-color: #0a1628;">
+                <strong style="color: #0a1628;">💰 Faturamento Bruto:</strong> 
                 <span>Soma da Receita Bruta de Produção Direta e Portal MAAS</span>
             </div>
             <div class="legenda-item" style="background: rgba(255, 107, 107, 0.1); border-color: #ff6b6b;">
                 <strong style="color: #ff6b6b;">📉 Custos Totais:</strong> 
                 <span>Impostos Diretos + Custo Operacional (D.A.) + Rebate AAI - Co-corretagem</span>
             </div>
-            <div class="legenda-item" style="background: rgba(84, 160, 255, 0.1); border-color: #54a0ff;">
-                <strong style="color: #54a0ff;">📊 Margem de Contribuição:</strong> 
+            <div class="legenda-item" style="background: rgba(46, 134, 171, 0.1); border-color: #2e86ab;">
+                <strong style="color: #2e86ab;">📊 Margem de Contribuição:</strong> 
                 <span>Faturamento Bruto menos Custos Totais (Prod. Direta + Portal MAAS)</span>
             </div>
             <div class="legenda-item" style="background: rgba(254, 202, 87, 0.1); border-color: #feca57;">
@@ -1608,18 +1608,18 @@ def main():
             </div>
             <div class="legenda-item" style="background: rgba(0, 212, 170, 0.1); border-color: #00d4aa;">
                 <strong style="color: #00d4aa;">🎯 Resultado Operacional:</strong> 
-                <span>Margem de Contribuição - Despesas (Linha 27 da DRE) • Base para distribuição 65/35</span>
+                <span>Margem de Contribuição - Despesas • Base para distribuição 65/35</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     # =========================================================================
-    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL - GRÁFICOS OSCAR
+    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL - GRÁFICOS AZUL MALDIVAS
     # =========================================================================
     if show_charts:
         st.markdown("""
-        <div class="section-header" style="background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);">
+        <div class="section-header" style="background: linear-gradient(135deg, #1a3a5c 0%, #2e86ab 100%);">
             <h2>📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO</h2>
         </div>
         """, unsafe_allow_html=True)
@@ -1628,6 +1628,7 @@ def main():
         receita_bruta = [dados_mensais_atual[m]['receita_bruta'] for m in meses]
         resultado_op_mensal = [dados_mensais_atual[m]['resultado_op'] for m in meses]
         
+        # Crescimento mensal da RECEITA (não do resultado)
         crescimento = [0]
         for i in range(1, len(receita_bruta)):
             if receita_bruta[i-1] > 0:
@@ -1640,27 +1641,27 @@ def main():
             rows=1, cols=3,
             subplot_titles=(
                 '<b>📊 Receita Bruta por Mês</b>',
-                '<b>📈 Crescimento Mensal (%)</b>',
+                '<b>📈 Crescimento Mensal da Receita (%)</b>',
                 '<b>🎯 Resultado Operacional</b>'
             ),
             horizontal_spacing=0.08,
             column_widths=[0.35, 0.30, 0.35]
         )
         
-        # Gráfico 1: Receita Bruta
+        # Gráfico 1: Receita Bruta - Tons de Azul
         fig_evolucao.add_trace(
             go.Bar(
                 x=meses, y=receita_bruta,
                 marker=dict(
                     color=receita_bruta, 
-                    colorscale='Viridis', 
+                    colorscale=[[0, '#4ea8de'], [0.5, '#2e86ab'], [1, '#0a1628']], 
                     showscale=False, 
                     line=dict(width=3, color='white'),
                     cornerradius=8
                 ),
                 text=[f"R$ {v/1000:.1f}K" for v in receita_bruta],
                 textposition='outside',
-                textfont=dict(size=16, color='#1a1a2e', family='Arial Black'),
+                textfont=dict(size=16, color='#0a1628', family='Arial Black'),
                 name='Receita Bruta',
                 hovertemplate='<b>%{x}</b><br>Receita: R$ %{y:,.0f}<extra></extra>',
                 width=0.6
@@ -1668,18 +1669,18 @@ def main():
             row=1, col=1
         )
         
-        # Gráfico 2: Crescimento Mensal
+        # Gráfico 2: Crescimento Mensal da Receita - Tons de Azul
         cores_cresc = ['#00d4aa' if c >= 0 else '#ff6b6b' for c in crescimento]
         cores_cresc[0] = '#6c757d'
         fig_evolucao.add_trace(
             go.Scatter(
                 x=meses, y=crescimento,
                 mode='lines+markers+text',
-                line=dict(color='#667eea', width=5, shape='spline'),
+                line=dict(color='#1a3a5c', width=5, shape='spline'),
                 marker=dict(size=22, color=cores_cresc, line=dict(width=4, color='white'), symbol='circle'),
                 text=[f"{v:+.1f}%" for v in crescimento],
                 textposition='top center',
-                textfont=dict(size=15, family='Arial Black', color='#1a1a2e'),
+                textfont=dict(size=15, family='Arial Black', color='#0a1628'),
                 name='Crescimento %',
                 hovertemplate='<b>%{x}</b><br>Crescimento: %{y:+.1f}%<extra></extra>'
             ),
@@ -1700,7 +1701,7 @@ def main():
                 ),
                 text=[f"R$ {v/1000:.1f}K" for v in resultado_op_mensal],
                 textposition='outside',
-                textfont=dict(size=16, family='Arial Black', color='#1a1a2e'),
+                textfont=dict(size=16, family='Arial Black', color='#0a1628'),
                 name='Resultado',
                 hovertemplate='<b>%{x}</b><br>Resultado: R$ %{y:,.0f}<extra></extra>',
                 width=0.6
@@ -1715,14 +1716,14 @@ def main():
             showlegend=False,
             paper_bgcolor='white',
             plot_bgcolor='rgba(0,0,0,0)',
-            font=dict(family='Inter, Segoe UI', size=14, color='#1a1a2e'),
-            hoverlabel=dict(bgcolor='white', font_size=15, bordercolor='#667eea'),
+            font=dict(family='Inter, Segoe UI', size=14, color='#0a1628'),
+            hoverlabel=dict(bgcolor='white', font_size=15, bordercolor='#1a3a5c'),
             margin=dict(l=70, r=70, t=100, b=70)
         )
         
         fig_evolucao.update_xaxes(
             gridcolor='#e8e8e8', 
-            tickfont=dict(size=14, family='Inter', color='#1a1a2e'), 
+            tickfont=dict(size=14, family='Inter', color='#0a1628'), 
             tickangle=0
         )
         fig_evolucao.update_yaxes(
@@ -1737,7 +1738,7 @@ def main():
     # =========================================================================
     if show_charts and df_seg is not None and len(df_seg) > 0:
         st.markdown("""
-        <div class="section-header" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+        <div class="section-header" style="background: linear-gradient(135deg, #1a3a5c 0%, #0a1628 100%);">
             <h2>🏆 RANKING - MAIORES COMISSÕES POR SEGURADORA</h2>
         </div>
         """, unsafe_allow_html=True)
@@ -1750,7 +1751,7 @@ def main():
             orientation='h',
             marker=dict(
                 color=df_seg['Total'].head(15),
-                colorscale='Viridis',
+                colorscale=[[0, '#4ea8de'], [0.5, '#2e86ab'], [1, '#0a1628']],
                 showscale=True,
                 colorbar=dict(
                     title=dict(text='Comissão (R$)', font=dict(size=13, family='Inter')), 
@@ -1762,7 +1763,7 @@ def main():
             ),
             text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_seg['Total'].head(15), df_seg['% do Total'].head(15))],
             textposition='outside',
-            textfont=dict(size=13, family='Inter', color='#1a1a2e', weight='bold'),
+            textfont=dict(size=13, family='Inter', color='#0a1628', weight='bold'),
             hovertemplate='<b>%{y}</b><br>Comissão: R$ %{x:,.2f}<extra></extra>',
             width=0.7
         ))
@@ -1770,7 +1771,7 @@ def main():
         fig_ranking_seg.update_layout(
             title=dict(
                 text='🏢 Top 15 Seguradoras por Volume de Comissão', 
-                font=dict(size=22, family='Inter', color='#1a1a2e', weight='bold'), 
+                font=dict(size=22, family='Inter', color='#0a1628', weight='bold'), 
                 x=0.5, 
                 xanchor='center'
             ),
@@ -1791,15 +1792,15 @@ def main():
     # =========================================================================
     if show_charts:
         st.markdown("""
-        <div class="section-header" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+        <div class="section-header" style="background: linear-gradient(135deg, #2e86ab 0%, #4ea8de 100%);">
             <h2>🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS</h2>
         </div>
         """, unsafe_allow_html=True)
         
         meses_dist = list(dados_mensais_atual.keys())
-        resultado_linha27 = [dados_mensais_atual[m]['resultado_op'] for m in meses_dist]
-        partner = [int(r * 0.65) for r in resultado_linha27]
-        maldivas = [int(r * 0.35) for r in resultado_linha27]
+        resultado_dist = [dados_mensais_atual[m]['resultado_op'] for m in meses_dist]
+        partner = [int(r * 0.65) for r in resultado_dist]
+        maldivas = [int(r * 0.35) for r in resultado_dist]
         
         fig_dist = go.Figure()
         
@@ -1807,7 +1808,7 @@ def main():
             name='Partner (65%)',
             x=meses_dist,
             y=partner,
-            marker_color='#667eea',
+            marker_color='#0a1628',
             marker_line=dict(width=3, color='white'),
             text=[f"R$ {v/1000:.1f}K" for v in partner],
             textposition='outside',
@@ -1819,7 +1820,7 @@ def main():
             name='Maldivas (35%)',
             x=meses_dist,
             y=maldivas,
-            marker_color='#f093fb',
+            marker_color='#4ea8de',
             marker_line=dict(width=3, color='white'),
             text=[f"R$ {v/1000:.1f}K" for v in maldivas],
             textposition='outside',
@@ -1828,31 +1829,31 @@ def main():
         ))
         
         fig_dist.add_trace(go.Scatter(
-            name='Resultado Total (Linha 27)',
+            name='Resultado Total',
             x=meses_dist,
-            y=resultado_linha27,
+            y=resultado_dist,
             mode='lines+markers+text',
             line=dict(color='#00d4aa', width=4, dash='dot'),
             marker=dict(
                 size=16, 
-                color=['#00d4aa' if r >= 0 else '#ff6b6b' for r in resultado_linha27], 
+                color=['#00d4aa' if r >= 0 else '#ff6b6b' for r in resultado_dist], 
                 line=dict(width=3, color='white')
             ),
-            text=[f"R$ {v/1000:.1f}K" for v in resultado_linha27],
+            text=[f"R$ {v/1000:.1f}K" for v in resultado_dist],
             textposition='top center',
-            textfont=dict(size=14, family='Inter', color='#1a1a2e', weight='bold'),
+            textfont=dict(size=14, family='Inter', color='#0a1628', weight='bold'),
         ))
         
         fig_dist.add_hline(y=0, line_dash="solid", line_color="#ff6b6b", line_width=3)
         
-        min_val = min(min(partner), min(maldivas), min(resultado_linha27))
-        max_val = max(max(partner), max(maldivas), max(resultado_linha27))
+        min_val = min(min(partner), min(maldivas), min(resultado_dist))
+        max_val = max(max(partner), max(maldivas), max(resultado_dist))
         y_range = [min_val * 1.4 if min_val < 0 else -1000, max_val * 1.4]
         
         fig_dist.update_layout(
             title=dict(
-                text='📊 Distribuição do Resultado (Linha 27) - Partner 65% / Maldivas 35%',
-                font=dict(size=22, family='Inter', color='#1a1a2e', weight='bold'),
+                text='📊 Distribuição do Resultado - Partner 65% / Maldivas 35%',
+                font=dict(size=22, family='Inter', color='#0a1628', weight='bold'),
                 x=0.5,
                 xanchor='center'
             ),
@@ -1885,13 +1886,13 @@ def main():
         
         st.plotly_chart(fig_dist, use_container_width=True)
         
-        total_resultado = sum(resultado_linha27)
+        total_resultado = sum(resultado_dist)
         partner_total = int(total_resultado * 0.65)
         maldivas_total = int(total_resultado * 0.35)
         
         if total_resultado >= 0:
             st.success(f"""
-            ✅ **TOTAIS YTD (Linha 27):** 
+            ✅ **TOTAIS YTD:** 
             Resultado = **{formatar_moeda(total_resultado)}** 
             → Partner (65%): **{formatar_moeda(partner_total)}** 
             | Maldivas (35%): **{formatar_moeda(maldivas_total)}** 
@@ -1899,7 +1900,7 @@ def main():
             """)
         else:
             st.error(f"""
-            ⚠️ **TOTAIS YTD (Linha 27):** 
+            ⚠️ **TOTAIS YTD:** 
             Resultado = **{formatar_moeda(total_resultado)}** 
             → Partner (65%): **{formatar_moeda(partner_total)}** 
             | Maldivas (35%): **{formatar_moeda(maldivas_total)}** 
@@ -1912,7 +1913,7 @@ def main():
     if show_charts and df_prod is not None and len(df_prod) > 0:
         st.markdown("""
         <div class="section-header" style="background: linear-gradient(135deg, #feca57 0%, #ff9f43 100%);">
-            <h2 style="color: #1a1a2e;">📦 ANÁLISE POR TIPO DE PRODUTO</h2>
+            <h2 style="color: #0a1628;">📦 ANÁLISE POR TIPO DE PRODUTO</h2>
         </div>
         """, unsafe_allow_html=True)
         
@@ -1932,7 +1933,7 @@ def main():
                 paper_bgcolor='white', 
                 font=dict(family='Inter', size=13),
                 title=dict(
-                    font=dict(size=20, family='Inter', color='#1a1a2e', weight='bold'), 
+                    font=dict(size=20, family='Inter', color='#0a1628', weight='bold'), 
                     x=0.5, 
                     xanchor='center'
                 ), 
@@ -1965,14 +1966,14 @@ def main():
                 ),
                 text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_prod['Total'], df_prod['% do Total'])],
                 textposition='outside', 
-                textfont=dict(size=13, family='Inter', color='#1a1a2e'),
+                textfont=dict(size=13, family='Inter', color='#0a1628'),
                 hovertemplate='<b>%{y}</b><br>Comissão: R$ %{x:,.2f}<extra></extra>', 
                 width=0.7
             ))
             fig_prod_bar.update_layout(
                 title=dict(
                     text='📊 Comissão por Tipo de Produto', 
-                    font=dict(size=20, family='Inter', color='#1a1a2e', weight='bold'), 
+                    font=dict(size=20, family='Inter', color='#0a1628', weight='bold'), 
                     x=0.5, 
                     xanchor='center'
                 ),
@@ -1992,7 +1993,7 @@ def main():
     # =========================================================================
     if show_charts and df_orig is not None and len(df_orig) > 0:
         st.markdown("""
-        <div class="section-header" style="background: linear-gradient(135deg, #54a0ff 0%, #00d4aa 100%);">
+        <div class="section-header" style="background: linear-gradient(135deg, #2e86ab 0%, #00d4aa 100%);">
             <h2>👥 RANKING - TOP ORIGINADORES</h2>
         </div>
         """, unsafe_allow_html=True)
@@ -2029,7 +2030,7 @@ def main():
             fig_orig.update_layout(
                 title=dict(
                     text='🏅 Distribuição de Comissão por Originador', 
-                    font=dict(size=20, family='Inter', color='#1a1a2e', weight='bold'), 
+                    font=dict(size=20, family='Inter', color='#0a1628', weight='bold'), 
                     x=0.5, 
                     xanchor='center'
                 ),
@@ -2068,7 +2069,7 @@ def main():
                     <div style="display: flex; align-items: center;">
                         <span style="font-size: 3.5rem; margin-right: 25px; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));">{medalhas[i]}</span>
                         <div>
-                            <div style="font-size: 1.3rem; font-weight: 800; color: #1a1a2e; margin-bottom: 8px;">{row['Originador']}</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: #0a1628; margin-bottom: 8px;">{row['Originador']}</div>
                             <div style="font-size: 1.8rem; color: #00d4aa; font-weight: 900;">{formatar_moeda(row['Total'])}</div>
                             <div style="font-size: 1rem; color: #6c757d; margin-top: 8px;">
                                 📊 {int(row['Operações'])} operações | 💰 Ticket: {formatar_moeda(row['Ticket Médio'])}
@@ -2083,7 +2084,7 @@ def main():
     # =========================================================================
     if show_charts and df_cli is not None and len(df_cli) > 0:
         st.markdown("""
-        <div class="section-header" style="background: linear-gradient(135deg, #00d4aa 0%, #54a0ff 100%);">
+        <div class="section-header" style="background: linear-gradient(135deg, #00d4aa 0%, #2e86ab 100%);">
             <h2>🏅 RANKING - MAIORES CLIENTES POR RECEITA</h2>
         </div>
         """, unsafe_allow_html=True)
@@ -2108,7 +2109,7 @@ def main():
             ),
             text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_cli['Total'].head(15), df_cli['% do Total'].head(15))],
             textposition='outside', 
-            textfont=dict(size=12, family='Inter', color='#1a1a2e'),
+            textfont=dict(size=12, family='Inter', color='#0a1628'),
             hovertemplate='<b>%{y}</b><br>Receita: R$ %{x:,.2f}<extra></extra>', 
             width=0.7
         ))
@@ -2116,7 +2117,7 @@ def main():
         fig_ranking_cli.update_layout(
             title=dict(
                 text='🏢 Top 15 Clientes por Volume de Receita', 
-                font=dict(size=22, family='Inter', color='#1a1a2e', weight='bold'), 
+                font=dict(size=22, family='Inter', color='#0a1628', weight='bold'), 
                 x=0.5, 
                 xanchor='center'
             ),
@@ -2155,7 +2156,7 @@ def main():
             ),
             text=[f"R$ {v/1000:.1f}K" for v in df_cat['Total'].head(10)],
             textposition='outside', 
-            textfont=dict(size=14, family='Inter', color='#1a1a2e'),
+            textfont=dict(size=14, family='Inter', color='#0a1628'),
             hovertemplate='<b>%{x}</b><br>Valor: R$ %{y:,.2f}<extra></extra>', 
             width=0.7
         ))
@@ -2163,7 +2164,7 @@ def main():
         fig_desp_bar.update_layout(
             title=dict(
                 text='📊 Top 10 Categorias de Despesas', 
-                font=dict(size=22, family='Inter', color='#1a1a2e', weight='bold'), 
+                font=dict(size=22, family='Inter', color='#0a1628', weight='bold'), 
                 x=0.5, 
                 xanchor='center'
             ),
@@ -2185,7 +2186,7 @@ def main():
     # =========================================================================
     if show_tables:
         st.markdown("""
-        <div class="section-header" style="background: linear-gradient(135deg, #1a1a2e 0%, #2d3a87 100%);">
+        <div class="section-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);">
             <h2>📋 RESUMO EXECUTIVO - DRE</h2>
         </div>
         """, unsafe_allow_html=True)
@@ -2209,7 +2210,7 @@ def main():
                 '    → Despesas Operacionais',
                 '    → Folha + Terceiros',
                 '',
-                '🎯 RESULTADO OPERACIONAL (Linha 27)',
+                '🎯 RESULTADO OPERACIONAL',
             ],
             'Valor': [
                 formatar_moeda(totais['receita_bruta']),
@@ -2250,7 +2251,7 @@ def main():
     
     with col2:
         if st.button("📄 GERAR PDF PROFISSIONAL PREMIUM", type="primary", use_container_width=True):
-            with st.spinner("🎬 Gerando PDF Oscar Edition..."):
+            with st.spinner("🎬 Gerando PDF..."):
                 try:
                     pdf_generator = PDFDashboardGenerator()
                     pdf_bytes = pdf_generator.generate_pdf(
@@ -2263,12 +2264,12 @@ def main():
                         df_cat=df_cat
                     )
                     
-                    st.success("✅ PDF Oscar Edition gerado com sucesso!")
+                    st.success("✅ PDF gerado com sucesso!")
                     
                     st.download_button(
-                        label="⬇️ BAIXAR PDF OSCAR EDITION",
+                        label="⬇️ BAIXAR PDF",
                         data=pdf_bytes,
-                        file_name=f"Assertif_Dashboard_Oscar_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
+                        file_name=f"Assertif_Dashboard_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf",
                         mime="application/pdf",
                         use_container_width=True
                     )
@@ -2278,24 +2279,24 @@ def main():
                     st.info("💡 Verifique se todas as bibliotecas estão instaladas corretamente.")
     
     # =========================================================================
-    # 🎬 FOOTER OSCAR EDITION
+    # 🎬 FOOTER - AZUL MALDIVAS
     # =========================================================================
     st.markdown("---")
     st.markdown("""
     <div style="
-        background: linear-gradient(135deg, #1a1a2e 0%, #2d3a87 50%, #667eea 100%);
+        background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 50%, #2e86ab 100%);
         padding: 50px;
         border-radius: 28px;
         text-align: center;
         margin-top: 50px;
         color: white;
-        box-shadow: 0 25px 70px rgba(26, 26, 46, 0.5);
+        box-shadow: 0 25px 70px rgba(10, 22, 40, 0.5);
     ">
-        <span style="font-size: 4rem; display: block; margin-bottom: 20px;">🏆</span>
+        <span style="font-size: 4rem; display: block; margin-bottom: 20px;">📊</span>
         <h2 style="margin-bottom: 15px; font-size: 2rem; font-weight: 900;">ASSERTIF CORRETORA</h2>
-        <h3 style="margin-bottom: 20px; font-weight: 600; opacity: 0.95;">Dashboard Financeiro Premium - Oscar Edition</h3>
+        <h3 style="margin-bottom: 20px; font-weight: 600; opacity: 0.95;">Dashboard Financeiro</h3>
         <p style="opacity: 0.9; font-size: 1.1rem; line-height: 1.8;">
-            📊 Versão 6.0 Oscar Edition | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>
+            📊 Versão 6.0 | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>
             Desenvolvido com Streamlit + Plotly + ReportLab | Design Premium
         </p>
         <div style="
@@ -2306,7 +2307,7 @@ def main():
             display: inline-block;
             backdrop-filter: blur(10px);
         ">
-            <span style="font-size: 0.95rem;">✨ Uma apresentação digna de Oscar ✨</span>
+            <span style="font-size: 0.95rem;">✨ Maldivas Holding ✨</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
