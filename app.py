@@ -1,4 +1,2009 @@
- > 5 else 0
+# =============================================================================
+# 🚀 ASSERTIF CORRETORA - DASHBOARD FINANCEIRO PREMIUM - VERSÃO OSCAR
+# =============================================================================
+# Dashboard interativo com rankings, filtros e visualizações profissionais
+# Versão: 6.0 PREMIUM ULTIMATE OSCAR EDITION
+# Para rodar: streamlit run dashboard_assertif.py
+# =============================================================================
+
+# ARQUIVO: dashboard_assertif.py
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import io
+import warnings
+from datetime import datetime
+import base64
+import os
+import math
+
+# ReportLab imports para PDF
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch, cm, mm
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
+    PageBreak, Image, KeepTogether, HRFlowable, ListFlowable, ListItem,
+    NextPageTemplate, PageTemplate, Frame, BaseDocTemplate
+)
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
+from reportlab.graphics.shapes import Drawing, Rect, String, Line, Circle, Ellipse
+from reportlab.graphics.charts.barcharts import VerticalBarChart, HorizontalBarChart
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
+from reportlab.graphics.charts.legends import Legend
+from reportlab.graphics.widgets.markers import makeMarker
+from reportlab.pdfgen import canvas
+from reportlab.lib.colors import HexColor, Color
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+warnings.filterwarnings('ignore')
+
+# =============================================================================
+# 🎨 CONFIGURAÇÕES DE ESTILO PREMIUM OSCAR EDITION
+# =============================================================================
+
+# Paleta de cores profissional - Atualizada para visual Oscar
+CORES = {
+    'primaria': '#667eea',
+    'secundaria': '#764ba2',
+    'sucesso': '#00d4aa',
+    'perigo': '#ff6b6b',
+    'alerta': '#feca57',
+    'info': '#54a0ff',
+    'escuro': '#1a1a2e',
+    'claro': '#f8f9fa',
+    'ouro': '#ffd700',
+    'prata': '#c0c0c0',
+    'bronze': '#cd7f32',
+    'gradiente': ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'],
+    'chart_colors': ['#667eea', '#00d4aa', '#ff6b6b', '#feca57', '#54a0ff', '#764ba2', '#00f2fe', '#f093fb']
+}
+
+# Paletas para gráficos
+PALETA_SEQUENCIAL = px.colors.sequential.Viridis
+PALETA_QUALITATIVA = px.colors.qualitative.Set2
+PALETA_DIVERGENTE = px.colors.diverging.RdYlGn
+
+# =============================================================================
+# 📊 DADOS MENSAIS DA DRE - ESTRUTURA ATUALIZADA AUTOMATICAMENTE
+# =============================================================================
+
+DADOS_MENSAIS = {
+    'Janeiro': {
+        'receita_bruta': 42263,
+        'custos_totais': 21890,
+        'margem_contrib': 20373,
+        'despesas': 15240,
+        'resultado_op': 5133
+    },
+    'Fevereiro': {
+        'receita_bruta': 49513,
+        'custos_totais': 26782,
+        'margem_contrib': 22732,
+        'despesas': 15065,
+        'resultado_op': 7667
+    },
+    'Março': {
+        'receita_bruta': 71946,
+        'custos_totais': 39509,
+        'margem_contrib': 32436,
+        'despesas': 15746,
+        'resultado_op': 16690
+    },
+    'Abril': {
+        'receita_bruta': 17075,
+        'custos_totais': 8758,
+        'margem_contrib': 8317,
+        'despesas': 17017,
+        'resultado_op': -8699
+    }
+}
+
+# =============================================================================
+# 📊 FUNÇÕES AUXILIARES PREMIUM
+# =============================================================================
+
+def formatar_moeda(valor):
+    """Formata valor para moeda brasileira"""
+    try:
+        if pd.isna(valor) or valor == 0:
+            return "R$ 0,00"
+        if valor < 0:
+            return f"-R$ {abs(valor):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    except:
+        return str(valor)
+
+def formatar_percentual(valor):
+    """Formata valor como percentual"""
+    try:
+        return f"{valor:.1f}%"
+    except:
+        return str(valor)
+
+def calcular_dados_filtrados(meses_selecionados, dados_mensais_atual=None):
+    """Calcula os totais baseado nos meses selecionados"""
+    dados_para_usar = dados_mensais_atual if dados_mensais_atual is not None else DADOS_MENSAIS
+    
+    if 'All' in meses_selecionados or len(meses_selecionados) == 0:
+        meses_selecionados = list(dados_para_usar.keys())
+    
+    totais = {
+        'receita_bruta': 0,
+        'custos_totais': 0,
+        'margem_contrib': 0,
+        'despesas': 0,
+        'resultado_op': 0
+    }
+    
+    for mes in meses_selecionados:
+        if mes in dados_para_usar:
+            for key in totais:
+                totais[key] += dados_para_usar[mes][key]
+    
+    return totais, meses_selecionados
+
+
+def extrair_dados_dre(df_dre):
+    """
+    🎯 FUNÇÃO INOVADORA E PRECISA PARA EXTRAIR DADOS DA DRE 2026
+    """
+    dados_extraidos = {}
+    
+    meses_colunas = {
+        1: 'Janeiro',
+        2: 'Fevereiro', 
+        3: 'Março',
+        4: 'Abril',
+        5: 'Maio',
+        6: 'Junho',
+        7: 'Julho',
+        8: 'Agosto',
+        9: 'Setembro',
+        10: 'Outubro',
+        11: 'Novembro',
+        12: 'Dezembro'
+    }
+    
+    linhas_encontradas = {
+        'receita_bruta_total': None,
+        'impostos_diretos': None,
+        'custo_op_da': None,
+        'co_corretagem': None,
+        'rebate_aai': None,
+        'margem_contrib_direta': None,
+        'despesas': None,
+        'folha_terceiros': None,
+        'margem_contrib_maas': None,
+        'resultado_op': None
+    }
+    
+    try:
+        if hasattr(df_dre, 'values'):
+            dados = df_dre.values
+        else:
+            dados = df_dre
+        
+        for idx, row in enumerate(dados):
+            if len(row) > 0:
+                texto_celula = str(row[0]).strip().upper() if row[0] is not None else ""
+                
+                if 'RECEITA BRUTA TOTAL' in texto_celula and 'MAAS' in texto_celula:
+                    linhas_encontradas['receita_bruta_total'] = idx
+                
+                elif texto_celula == 'IMPOSTOS DIRETOS' or texto_celula.startswith('IMPOSTOS DIRETOS'):
+                    if linhas_encontradas['impostos_diretos'] is None:
+                        linhas_encontradas['impostos_diretos'] = idx
+                
+                elif 'CUSTO OPERACIONAL' in texto_celula and 'D.A' in texto_celula:
+                    if linhas_encontradas['custo_op_da'] is None:
+                        linhas_encontradas['custo_op_da'] = idx
+                
+                elif texto_celula == 'CO-CORRETAGEM' or texto_celula.startswith('CO-CORRETAGEM'):
+                    linhas_encontradas['co_corretagem'] = idx
+                
+                elif texto_celula == 'REBATE AAI' or texto_celula.startswith('REBATE AAI'):
+                    if linhas_encontradas['rebate_aai'] is None:
+                        linhas_encontradas['rebate_aai'] = idx
+                
+                elif 'MARGEM DE CONTRIBUIÇÃO' in texto_celula:
+                    if linhas_encontradas['margem_contrib_direta'] is None:
+                        linhas_encontradas['margem_contrib_direta'] = idx
+                    elif linhas_encontradas['margem_contrib_maas'] is None:
+                        linhas_encontradas['margem_contrib_maas'] = idx
+                
+                elif texto_celula == 'DESPESAS' or texto_celula == 'DESPESAS ':
+                    if linhas_encontradas['despesas'] is None:
+                        linhas_encontradas['despesas'] = idx
+                
+                elif 'FOLHA' in texto_celula and 'TERCEIROS' in texto_celula:
+                    if linhas_encontradas['folha_terceiros'] is None:
+                        linhas_encontradas['folha_terceiros'] = idx
+                
+                elif texto_celula == 'RESULTADO OPERACIONAL' or texto_celula.startswith('RESULTADO OPERACIONAL'):
+                    if 'DISTRIBUIÇÃO' not in texto_celula and 'DISTRIBUI' not in texto_celula:
+                        linhas_encontradas['resultado_op'] = idx
+        
+        def get_valor(linha_idx, col_idx):
+            try:
+                if linha_idx is None:
+                    return 0
+                if linha_idx < len(dados) and col_idx < len(dados[linha_idx]):
+                    val = dados[linha_idx][col_idx]
+                    
+                    if val is None or val == '' or val == ' ':
+                        return 0
+                    
+                    if isinstance(val, (int, float)):
+                        if pd.isna(val):
+                            return 0
+                        return float(val)
+                    
+                    val_str = str(val).strip()
+                    
+                    is_negative = False
+                    if val_str.startswith('(') and val_str.endswith(')'):
+                        is_negative = True
+                        val_str = val_str[1:-1]
+                    
+                    val_str = val_str.replace('R$', '').replace(' ', '').strip()
+                    
+                    if '.' in val_str and ',' in val_str:
+                        val_str = val_str.replace('.', '').replace(',', '.')
+                    elif ',' in val_str:
+                        val_str = val_str.replace(',', '.')
+                    
+                    if val_str == '' or val_str == '-':
+                        return 0
+                    
+                    valor = float(val_str)
+                    return -valor if is_negative else valor
+                return 0
+            except (ValueError, TypeError) as e:
+                return 0
+        
+        for col_idx, mes_nome in meses_colunas.items():
+            if col_idx >= len(dados[0]):
+                continue
+            
+            receita_bruta = get_valor(linhas_encontradas['receita_bruta_total'], col_idx)
+            
+            if receita_bruta > 0:
+                impostos = abs(get_valor(linhas_encontradas['impostos_diretos'], col_idx))
+                custo_da = abs(get_valor(linhas_encontradas['custo_op_da'], col_idx))
+                co_corretagem = abs(get_valor(linhas_encontradas['co_corretagem'], col_idx))
+                rebate = abs(get_valor(linhas_encontradas['rebate_aai'], col_idx))
+                
+                margem_direta = get_valor(linhas_encontradas['margem_contrib_direta'], col_idx)
+                margem_maas = get_valor(linhas_encontradas['margem_contrib_maas'], col_idx)
+                margem_contrib = margem_direta + margem_maas
+                
+                despesas_op = abs(get_valor(linhas_encontradas['despesas'], col_idx))
+                folha_terceiros = abs(get_valor(linhas_encontradas['folha_terceiros'], col_idx))
+                despesas_total = despesas_op + folha_terceiros
+                
+                resultado_op = get_valor(linhas_encontradas['resultado_op'], col_idx)
+                
+                custos_totais = impostos + custo_da + rebate - co_corretagem
+                
+                dados_extraidos[mes_nome] = {
+                    'receita_bruta': round(receita_bruta, 2),
+                    'custos_totais': round(custos_totais, 2),
+                    'margem_contrib': round(margem_contrib, 2),
+                    'despesas': round(despesas_total, 2),
+                    'resultado_op': round(resultado_op, 2)
+                }
+        
+        return dados_extraidos if dados_extraidos else None
+        
+    except Exception as e:
+        print(f"❌ Erro ao extrair dados DRE: {e}")
+        return None
+
+
+def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], icone="📊", tamanho="normal"):
+    """Cria HTML para cartão de KPI estilizado - VERSÃO OSCAR"""
+    
+    # Tamanhos responsivos
+    if tamanho == "grande":
+        padding = "35px 25px"
+        icone_size = "3rem"
+        titulo_size = "1.1rem"
+        valor_size = "2.2rem"
+        subtitulo_size = "1rem"
+        min_height = "220px"
+    else:
+        padding = "30px 20px"
+        icone_size = "2.8rem"
+        titulo_size = "0.95rem"
+        valor_size = "1.9rem"
+        subtitulo_size = "0.9rem"
+        min_height = "200px"
+    
+    html = f"""
+    <div style="
+        background: linear-gradient(145deg, {cor} 0%, {cor}dd 50%, {cor}bb 100%);
+        padding: {padding};
+        border-radius: 24px;
+        color: white;
+        text-align: center;
+        box-shadow: 
+            0 20px 60px rgba(0,0,0,0.3),
+            0 8px 25px {cor}40,
+            inset 0 1px 0 rgba(255,255,255,0.2);
+        margin: 10px 5px;
+        min-height: {min_height};
+        border: 1px solid rgba(255,255,255,0.15);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    ">
+        <div style="
+            position: absolute;
+            top: -30%;
+            right: -30%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        "></div>
+        <div style="
+            font-size: {icone_size}; 
+            margin-bottom: 15px; 
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            position: relative;
+            z-index: 1;
+        ">{icone}</div>
+        <div style="
+            font-size: {titulo_size}; 
+            font-weight: 700; 
+            opacity: 1; 
+            margin-top: 5px; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+            position: relative;
+            z-index: 1;
+        ">{titulo}</div>
+        <div style="
+            font-size: {valor_size}; 
+            font-weight: 900; 
+            margin: 18px 0; 
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 1;
+        ">{valor}</div>
+        <div style="
+            font-size: {subtitulo_size}; 
+            font-weight: 600; 
+            opacity: 0.95; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            background: rgba(255,255,255,0.15);
+            padding: 8px 16px;
+            border-radius: 20px;
+            position: relative;
+            z-index: 1;
+        ">{subtitulo}</div>
+    </div>
+    """
+    return html
+
+
+# =============================================================================
+# 📄 CLASSE PARA GERAÇÃO DE PDF COM REPORTLAB - VERSÃO OSCAR
+# =============================================================================
+
+class PDFDashboardGenerator:
+    """Classe para gerar PDF profissional do dashboard - Versão Oscar"""
+    
+    def __init__(self, filename="Assertif_Dashboard_Premium.pdf"):
+        self.filename = filename
+        self.styles = getSampleStyleSheet()
+        self._setup_custom_styles()
+        self.page_number = 0
+        self.total_pages = 0
+        
+    def _setup_custom_styles(self):
+        """Configura estilos customizados para o PDF"""
+        self.styles.add(ParagraphStyle(
+            name='CoverTitle',
+            parent=self.styles['Heading1'],
+            fontSize=42,
+            textColor=colors.white,
+            alignment=TA_CENTER,
+            spaceAfter=20,
+            fontName='Helvetica-Bold',
+            leading=50
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='CoverSubtitle',
+            parent=self.styles['Normal'],
+            fontSize=18,
+            textColor=colors.white,
+            alignment=TA_CENTER,
+            spaceAfter=30,
+            fontName='Helvetica',
+            leading=24
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='MainTitle',
+            parent=self.styles['Heading1'],
+            fontSize=28,
+            textColor=colors.white,
+            alignment=TA_CENTER,
+            spaceAfter=10,
+            fontName='Helvetica-Bold'
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='SubTitle',
+            parent=self.styles['Normal'],
+            fontSize=14,
+            textColor=colors.white,
+            alignment=TA_CENTER,
+            spaceAfter=20,
+            fontName='Helvetica'
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='SectionTitle',
+            parent=self.styles['Heading2'],
+            fontSize=16,
+            textColor=HexColor('#1a1a2e'),
+            alignment=TA_LEFT,
+            spaceAfter=12,
+            spaceBefore=20,
+            fontName='Helvetica-Bold'
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='NormalText',
+            parent=self.styles['Normal'],
+            fontSize=10,
+            textColor=HexColor('#1a1a2e'),
+            alignment=TA_LEFT,
+            spaceAfter=6,
+            fontName='Helvetica'
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='TOCEntry',
+            parent=self.styles['Normal'],
+            fontSize=12,
+            textColor=HexColor('#1a1a2e'),
+            alignment=TA_LEFT,
+            spaceAfter=8,
+            fontName='Helvetica',
+            leftIndent=20
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='NoteStyle',
+            parent=self.styles['Normal'],
+            fontSize=9,
+            textColor=HexColor('#6c757d'),
+            alignment=TA_JUSTIFY,
+            spaceAfter=6,
+            fontName='Helvetica-Oblique',
+            leftIndent=10,
+            rightIndent=10
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='PositiveValue',
+            parent=self.styles['Normal'],
+            fontSize=11,
+            textColor=HexColor('#00d4aa'),
+            alignment=TA_RIGHT,
+            fontName='Helvetica-Bold'
+        ))
+        
+        self.styles.add(ParagraphStyle(
+            name='NegativeValue',
+            parent=self.styles['Normal'],
+            fontSize=11,
+            textColor=HexColor('#ff6b6b'),
+            alignment=TA_RIGHT,
+            fontName='Helvetica-Bold'
+        ))
+    
+    def _create_cover_page(self):
+        """Cria página de capa profissional"""
+        elements = []
+        
+        elements.append(Spacer(1, 2*cm))
+        
+        logo_data = [[Paragraph(
+            "<font size='80'>📊</font>",
+            ParagraphStyle(name='LogoStyle', alignment=TA_CENTER, fontSize=80)
+        )]]
+        logo_table = Table(logo_data, colWidths=[18*cm])
+        logo_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        cover_content = [
+            [logo_table],
+            [Spacer(1, 1*cm)],
+            [Paragraph("ASSERTIF CORRETORA", self.styles['CoverTitle'])],
+            [Paragraph("DE SEGUROS", self.styles['CoverTitle'])],
+            [Spacer(1, 0.5*cm)],
+            [Paragraph("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 
+                      ParagraphStyle(name='LineCover', alignment=TA_CENTER, textColor=colors.white, fontSize=14))],
+            [Spacer(1, 0.5*cm)],
+            [Paragraph("Dashboard Financeiro Premium", self.styles['CoverSubtitle'])],
+            [Paragraph("Relatório Executivo | YTD 2026", self.styles['CoverSubtitle'])],
+            [Spacer(1, 2*cm)],
+            [Paragraph(f"📅 Período: Janeiro a Abril de 2026", 
+                      ParagraphStyle(name='CoverInfo', alignment=TA_CENTER, textColor=colors.white, fontSize=14, fontName='Helvetica'))],
+            [Paragraph(f"📈 Status: LUCRO | Margem: 11%", 
+                      ParagraphStyle(name='CoverInfo2', alignment=TA_CENTER, textColor=HexColor('#00d4aa'), fontSize=14, fontName='Helvetica-Bold'))],
+            [Spacer(1, 2*cm)],
+            [Paragraph(f"Gerado em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}", 
+                      ParagraphStyle(name='CoverDate', alignment=TA_CENTER, textColor=colors.white, fontSize=11, fontName='Helvetica'))],
+        ]
+        
+        cover_table = Table([[item[0]] for item in cover_content], colWidths=[18*cm])
+        cover_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#667eea')),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LEFTPADDING', (0, 0), (-1, -1), 30),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 30),
+        ]))
+        
+        elements.append(cover_table)
+        elements.append(Spacer(1, 1*cm))
+        
+        info_data = [
+            ['💰 Faturamento YTD', 'R$ 180.797,00', '📊 Margem Contribuição', 'R$ 83.858,00'],
+            ['💸 Despesas Totais', 'R$ 63.068,00', '🎯 Resultado Operacional', 'R$ 20.791,00'],
+        ]
+        
+        info_table = Table(info_data, colWidths=[5*cm, 4*cm, 5*cm, 4*cm])
+        info_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f8f9fa')),
+            ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#1a1a2e')),
+            ('TEXTCOLOR', (2, 0), (2, -1), HexColor('#1a1a2e')),
+            ('TEXTCOLOR', (1, 0), (1, -1), HexColor('#00d4aa')),
+            ('TEXTCOLOR', (3, 0), (3, -1), HexColor('#00d4aa')),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (3, 0), (3, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 1, HexColor('#e8e8e8')),
+            ('BOX', (0, 0), (-1, -1), 2, HexColor('#667eea')),
+        ]))
+        
+        elements.append(info_table)
+        elements.append(PageBreak())
+        
+        return elements
+    
+    def _create_table_of_contents(self):
+        """Cria sumário/índice do documento"""
+        elements = []
+        
+        toc_header = [[Paragraph("<font color='white'><b>📑 SUMÁRIO</b></font>", 
+                                 ParagraphStyle(name='TOCHeader', alignment=TA_CENTER, fontSize=20, fontName='Helvetica-Bold'))]]
+        toc_header_table = Table(toc_header, colWidths=[18*cm])
+        toc_header_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#1a1a2e')),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 20),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+        ]))
+        
+        elements.append(toc_header_table)
+        elements.append(Spacer(1, 1*cm))
+        
+        toc_items = [
+            ('1.', '💰 Indicadores Principais (KPIs)', '3'),
+            ('2.', '📈 Evolução Mensal - Receita vs Resultado', '3'),
+            ('3.', '🏆 Ranking - Maiores Comissões por Seguradora', '4'),
+            ('4.', '🤝 Distribuição de Resultados - Sócios', '4'),
+            ('5.', '👥 Ranking - Top Originadores', '5'),
+            ('6.', '🏅 Ranking - Maiores Clientes', '5'),
+            ('7.', '📦 Análise por Tipo de Produto', '6'),
+            ('8.', '💸 Ranking - Maiores Despesas', '6'),
+            ('9.', '📋 Resumo Executivo - DRE Completo', '7'),
+            ('10.', '📊 Análise Gráfica Consolidada', '8'),
+            ('11.', '📝 Notas e Observações', '9'),
+        ]
+        
+        toc_data = []
+        for num, titulo, pagina in toc_items:
+            toc_data.append([
+                Paragraph(f"<b>{num}</b>", ParagraphStyle(name='TOCNum', fontSize=12, textColor=HexColor('#667eea'), fontName='Helvetica-Bold')),
+                Paragraph(titulo, ParagraphStyle(name='TOCTitle', fontSize=12, textColor=HexColor('#1a1a2e'), fontName='Helvetica')),
+                Paragraph(f"<b>{pagina}</b>", ParagraphStyle(name='TOCPage', fontSize=12, textColor=HexColor('#6c757d'), alignment=TA_RIGHT, fontName='Helvetica-Bold')),
+            ])
+        
+        toc_table = Table(toc_data, colWidths=[1.5*cm, 13.5*cm, 3*cm])
+        toc_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (0, -1), 'CENTER'),
+            ('ALIGN', (1, 0), (1, -1), 'LEFT'),
+            ('ALIGN', (2, 0), (2, -1), 'RIGHT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LINEBELOW', (0, 0), (-1, -2), 0.5, HexColor('#e8e8e8')),
+            ('LINEBELOW', (0, -1), (-1, -1), 2, HexColor('#667eea')),
+        ]))
+        
+        elements.append(toc_table)
+        elements.append(Spacer(1, 2*cm))
+        
+        info_box = [[Paragraph(
+            "<b>ℹ️ Sobre este Relatório</b><br/><br/>"
+            "Este dashboard apresenta uma visão consolidada do desempenho financeiro da Assertif Corretora "
+            "no período de Janeiro a Abril de 2026. Os dados incluem análise de receitas por seguradora, "
+            "produto, originador e cliente, além da distribuição de resultados entre os sócios e "
+            "evolução mensal dos principais indicadores.",
+            ParagraphStyle(name='InfoBox', fontSize=10, textColor=HexColor('#1a1a2e'), 
+                          alignment=TA_JUSTIFY, fontName='Helvetica', leading=14)
+        )]]
+        
+        info_box_table = Table(info_box, colWidths=[17*cm])
+        info_box_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#e8f4f8')),
+            ('BOX', (0, 0), (-1, -1), 2, HexColor('#54a0ff')),
+            ('TOPPADDING', (0, 0), (-1, -1), 15),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 15),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+        ]))
+        
+        elements.append(info_box_table)
+        elements.append(PageBreak())
+        
+        return elements
+    
+    def _create_section_header(self, titulo, cor=HexColor('#667eea'), icone="📊"):
+        """Cria cabeçalho de seção premium"""
+        section_data = [[
+            Paragraph(f"<font color='white'><b>{titulo}</b></font>", 
+                     ParagraphStyle(name='SectionHeader', fontSize=14, fontName='Helvetica-Bold', alignment=TA_LEFT))
+        ]]
+        section_table = Table(section_data, colWidths=[18*cm])
+        section_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), cor),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('LEFTPADDING', (0, 0), (-1, -1), 20),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+        ]))
+        return section_table
+    
+    def _create_kpi_cards(self, kpis):
+        """Cria cards de KPIs com visual premium"""
+        kpi_cells = []
+        
+        cores_kpi = [
+            HexColor('#667eea'),
+            HexColor('#ff6b6b'),
+            HexColor('#54a0ff'),
+            HexColor('#feca57'),
+            HexColor('#00d4aa'),
+        ]
+        
+        for i, kpi in enumerate(kpis):
+            cor = cores_kpi[i % len(cores_kpi)]
+            
+            card_content = [
+                [Paragraph(f"<font size='24'>{kpi.get('icone', '📊')}</font>", 
+                          ParagraphStyle(name=f'KPIIcon{i}', alignment=TA_CENTER))],
+                [Paragraph(f"<font size='7' color='white'><b>{kpi['titulo']}</b></font>", 
+                          ParagraphStyle(name=f'KPITitle{i}', alignment=TA_CENTER))],
+                [Paragraph(f"<font size='14' color='white'><b>{kpi['valor']}</b></font>", 
+                          ParagraphStyle(name=f'KPIValue{i}', alignment=TA_CENTER))],
+                [Paragraph(f"<font size='6' color='white'>{kpi.get('subtitulo', '')}</font>", 
+                          ParagraphStyle(name=f'KPISub{i}', alignment=TA_CENTER))],
+            ]
+            
+            card_table = Table(card_content, colWidths=[3.4*cm])
+            card_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), cor),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+                ('TOPPADDING', (0, 0), (-1, -1), 6),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('LEFTPADDING', (0, 0), (-1, -1), 4),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ]))
+            
+            kpi_cells.append(card_table)
+        
+        kpi_row = Table([kpi_cells], colWidths=[3.6*cm] * 5)
+        kpi_row.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ]))
+        
+        return kpi_row
+    
+    def _create_line_chart(self, data, labels, title, width=450, height=200):
+        """Cria gráfico de linha"""
+        drawing = Drawing(width, height)
+        
+        drawing.add(Rect(0, 0, width, height, fillColor=HexColor('#f8f9fa'), strokeColor=None))
+        
+        lc = HorizontalLineChart()
+        lc.x = 50
+        lc.y = 40
+        lc.height = height - 80
+        lc.width = width - 100
+        lc.data = [data]
+        lc.categoryAxis.categoryNames = labels
+        lc.categoryAxis.labels.fontName = 'Helvetica'
+        lc.categoryAxis.labels.fontSize = 9
+        lc.valueAxis.valueMin = 0
+        lc.valueAxis.valueMax = max(data) * 1.2 if data else 100
+        lc.valueAxis.labels.fontName = 'Helvetica'
+        lc.valueAxis.labels.fontSize = 8
+        lc.lines[0].strokeColor = HexColor('#667eea')
+        lc.lines[0].strokeWidth = 3
+        lc.lines[0].symbol = makeMarker('Circle')
+        lc.lines[0].symbol.fillColor = HexColor('#667eea')
+        lc.lines[0].symbol.strokeColor = colors.white
+        lc.lines[0].symbol.strokeWidth = 2
+        lc.lines[0].symbol.size = 8
+        
+        drawing.add(lc)
+        
+        drawing.add(String(width/2, height - 15, title, 
+                          fontName='Helvetica-Bold', fontSize=11, textAnchor='middle',
+                          fillColor=HexColor('#1a1a2e')))
+        
+        return drawing
+    
+    def _create_data_table(self, headers, data, col_widths=None, highlight_rows=None):
+        """Cria tabela de dados formatada premium"""
+        table_data = [headers] + data
+        
+        if col_widths is None:
+            col_widths = [18*cm / len(headers)] * len(headers)
+        
+        table = Table(table_data, colWidths=col_widths)
+        
+        style_commands = [
+            ('BACKGROUND', (0, 0), (-1, 0), HexColor('#667eea')),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+            ('LEFTPADDING', (0, 0), (-1, -1), 8),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 8),
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 1), (-1, -1), 9),
+            ('GRID', (0, 0), (-1, -1), 0.5, HexColor('#e8e8e8')),
+            ('BOX', (0, 0), (-1, -1), 1.5, HexColor('#667eea')),
+        ]
+        
+        for i in range(1, len(table_data)):
+            if i % 2 == 0:
+                style_commands.append(('BACKGROUND', (0, i), (-1, i), HexColor('#f8f9fa')))
+            else:
+                style_commands.append(('BACKGROUND', (0, i), (-1, i), colors.white))
+        
+        if highlight_rows:
+            for row_idx, cor in highlight_rows.items():
+                if row_idx < len(table_data):
+                    style_commands.append(('BACKGROUND', (0, row_idx), (-1, row_idx), cor))
+                    style_commands.append(('FONTNAME', (0, row_idx), (-1, row_idx), 'Helvetica-Bold'))
+        
+        table.setStyle(TableStyle(style_commands))
+        
+        return table
+    
+    def _create_note_box(self, titulo, texto, cor=HexColor('#54a0ff')):
+        """Cria box de nota explicativa"""
+        note_content = [[Paragraph(
+            f"<b>{titulo}</b><br/><br/>{texto}",
+            ParagraphStyle(name='NoteContent', fontSize=9, textColor=HexColor('#1a1a2e'), 
+                          alignment=TA_JUSTIFY, fontName='Helvetica', leading=12)
+        )]]
+        
+        note_table = Table(note_content, colWidths=[17*cm])
+        note_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f8f9fa')),
+            ('BOX', (0, 0), (-1, -1), 2, cor),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('LEFTPADDING', (0, 0), (-1, -1), 15),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 15),
+        ]))
+        
+        return note_table
+    
+    def _create_footer(self):
+        """Cria rodapé do documento"""
+        footer_data = [[
+            Paragraph(
+                "<font color='white'><b>✅ ASSERTIF CORRETORA - Dashboard Financeiro Premium</b><br/>"
+                f"📊 Versão 6.0 Oscar Edition | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>"
+                f"Documento gerado automaticamente em {datetime.now().strftime('%d/%m/%Y às %H:%M')}</font>",
+                ParagraphStyle(
+                    name='FooterStyle',
+                    parent=self.styles['Normal'],
+                    fontSize=10,
+                    textColor=colors.white,
+                    alignment=TA_CENTER,
+                )
+            )
+        ]]
+        
+        footer_table = Table(footer_data, colWidths=[18*cm])
+        footer_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#1a1a2e')),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 20),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 20),
+            ('LEFTPADDING', (0, 0), (-1, -1), 20),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 20),
+        ]))
+        
+        return footer_table
+    
+    def _add_page_number(self, canvas, doc):
+        """Adiciona número de página e cabeçalho/rodapé em cada página"""
+        canvas.saveState()
+        
+        canvas.setFillColor(HexColor('#667eea'))
+        canvas.rect(1*cm, A4[1] - 1.5*cm, A4[0] - 2*cm, 0.8*cm, fill=True, stroke=False)
+        
+        canvas.setFillColor(colors.white)
+        canvas.setFont('Helvetica-Bold', 9)
+        canvas.drawString(1.5*cm, A4[1] - 1.1*cm, "📊 ASSERTIF CORRETORA - Dashboard Financeiro Premium")
+        canvas.drawRightString(A4[0] - 1.5*cm, A4[1] - 1.1*cm, f"YTD 2026")
+        
+        canvas.setFillColor(HexColor('#1a1a2e'))
+        canvas.rect(1*cm, 0.5*cm, A4[0] - 2*cm, 0.6*cm, fill=True, stroke=False)
+        
+        canvas.setFillColor(colors.white)
+        canvas.setFont('Helvetica', 8)
+        canvas.drawString(1.5*cm, 0.7*cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y')}")
+        canvas.drawCentredString(A4[0]/2, 0.7*cm, "Confidencial - Uso Interno")
+        canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Página {doc.page}")
+        
+        canvas.restoreState()
+    
+    def generate_pdf(self, df_receitas_clean=None, df_despesas_clean=None, df_seg=None, 
+                     df_prod=None, df_orig=None, df_cli=None, df_cat=None):
+        """Gera o PDF completo do dashboard"""
+        
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=A4,
+            rightMargin=1*cm,
+            leftMargin=1*cm,
+            topMargin=2*cm,
+            bottomMargin=1.5*cm
+        )
+        
+        elements = []
+        
+        elements.extend(self._create_cover_page())
+        elements.extend(self._create_table_of_contents())
+        
+        elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs)", HexColor('#667eea')))
+        elements.append(Spacer(1, 15))
+        
+        kpis = [
+            {'titulo': 'FATURAMENTO', 'valor': 'R$ 180.797', 'subtitulo': 'Receita Bruta', 'icone': '💰'},
+            {'titulo': 'CUSTOS TOTAIS', 'valor': 'R$ 96.939', 'subtitulo': 'Impostos+DA+Rebate', 'icone': '📉'},
+            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 83.858', 'subtitulo': 'Fat-Custos', 'icone': '📊'},
+            {'titulo': 'DESPESAS', 'valor': 'R$ 63.066', 'subtitulo': 'Oper.+Folha', 'icone': '💸'},
+            {'titulo': 'RESULTADO', 'valor': 'R$ 20.791', 'subtitulo': 'Linha 27', 'icone': '🎯'},
+        ]
+        elements.append(self._create_kpi_cards(kpis))
+        elements.append(Spacer(1, 20))
+        
+        elements.append(self._create_note_box(
+            "📌 Legenda dos KPIs",
+            "<b>💰 Faturamento Bruto:</b> Soma da Receita Bruta de Produção Direta e Portal MAAS<br/><br/>"
+            "<b>📉 Custos Totais:</b> Soma de Impostos Diretos, Custo Operacional (D.A.) e Rebate AAI, menos Co-corretagem<br/><br/>"
+            "<b>📊 Margem de Contribuição:</b> Faturamento Bruto menos Custos Totais<br/><br/>"
+            "<b>💸 Despesas Totais:</b> Soma de Despesas Operacionais e Folha + Terceiros<br/><br/>"
+            "<b>🎯 Resultado Operacional:</b> Margem de Contribuição menos Despesas Totais (conforme Linha 27 da DRE)"
+        ))
+        elements.append(Spacer(1, 20))
+        
+        elements.append(self._create_section_header("📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO", HexColor('#00d4aa')))
+        elements.append(Spacer(1, 15))
+        
+        meses = ['Jan', 'Fev', 'Mar', 'Abr']
+        receita_bruta = [42263, 49513, 71946, 17075]
+        
+        elements.append(self._create_line_chart(receita_bruta, meses, '📈 Evolução da Receita Bruta Mensal (R$)', width=500, height=180))
+        elements.append(Spacer(1, 15))
+        
+        evolucao_headers = ['Mês', 'Receita Bruta', 'Var. %', 'Resultado Op.', 'Margem']
+        evolucao_data = [
+            ['Janeiro', 'R$ 42.263,00', '-', 'R$ 5.133,00', '12,1%'],
+            ['Fevereiro', 'R$ 49.513,00', '+17,2%', 'R$ 7.667,00', '15,5%'],
+            ['Março', 'R$ 71.946,00', '+45,3%', 'R$ 16.690,00', '23,2%'],
+            ['Abril', 'R$ 17.075,00', '-76,3%', '(R$ 8.699,00)', '-50,9%'],
+        ]
+        elements.append(self._create_data_table(evolucao_headers, evolucao_data, 
+                                                 [3*cm, 4*cm, 3*cm, 4*cm, 3*cm],
+                                                 highlight_rows={4: HexColor('#ffe6e6')}))
+        
+        elements.append(PageBreak())
+        
+        elements.append(Spacer(1, 30))
+        elements.append(self._create_footer())
+        
+        doc.build(elements, onFirstPage=self._add_page_number, onLaterPages=self._add_page_number)
+        
+        buffer.seek(0)
+        return buffer.getvalue()
+
+
+# =============================================================================
+# 🎯 APLICAÇÃO STREAMLIT PRINCIPAL - VERSÃO OSCAR EDITION
+# =============================================================================
+
+def main():
+    # Configuração da página
+    st.set_page_config(
+        page_title="Assertif Corretora - Dashboard Premium Oscar",
+        page_icon="🏆",
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    
+    # CSS customizado PREMIUM OSCAR EDITION - VISUAL INOVADOR
+    st.markdown("""
+    <style>
+        /* ========================================
+           🎬 ASSERTIF DASHBOARD - OSCAR EDITION
+           ======================================== */
+        
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        /* Reset e Base */
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        .main .block-container {
+            padding: 2rem 3rem;
+            max-width: 1400px;
+        }
+        
+        /* ========================================
+           🎨 HEADER PRINCIPAL - CINEMA STYLE
+           ======================================== */
+        .main-header {
+            background: linear-gradient(135deg, 
+                #667eea 0%, 
+                #764ba2 25%, 
+                #f093fb 50%, 
+                #764ba2 75%, 
+                #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            padding: 60px 50px;
+            border-radius: 32px;
+            text-align: center;
+            margin-bottom: 50px;
+            box-shadow: 
+                0 30px 80px rgba(102, 126, 234, 0.5),
+                0 15px 40px rgba(118, 75, 162, 0.3),
+                inset 0 2px 0 rgba(255,255,255,0.25);
+            border: 2px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .main-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+        
+        .main-header h1 {
+            color: white;
+            font-size: 3.8rem;
+            font-weight: 900;
+            text-shadow: 
+                4px 4px 12px rgba(0,0,0,0.4),
+                0 0 40px rgba(255,255,255,0.2);
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            letter-spacing: -1px;
+        }
+        
+        .main-header h2 {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 500;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .main-header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 25px;
+            border-radius: 50px;
+            margin-top: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        /* ========================================
+           📊 SEÇÕES - VISUAL PREMIUM
+           ======================================== */
+        .section-header {
+            padding: 28px 40px;
+            border-radius: 20px;
+            margin: 40px 0 25px 0;
+            box-shadow: 
+                0 15px 45px rgba(0,0,0,0.15),
+                0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1));
+        }
+        
+        .section-header:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 25px 60px rgba(0,0,0,0.2),
+                0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .section-header h2 {
+            color: white;
+            font-size: 1.9rem;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+            letter-spacing: -0.5px;
+        }
+        
+        /* ========================================
+           💳 CARDS DE MÉTRICAS - GLASSMORPHISM
+           ======================================== */
+        .stMetric {
+            background: linear-gradient(145deg, #667eea 0%, #667eeadd 100%);
+            padding: 30px;
+            border-radius: 24px;
+            color: white;
+            box-shadow: 
+                0 20px 50px rgba(102, 126, 234, 0.35),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        
+        .stMetric:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 
+                0 30px 70px rgba(102, 126, 234, 0.45),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        
+        /* ========================================
+           📈 TABELAS - DESIGN ELEGANTE
+           ======================================== */
+        .stDataFrame {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 
+                0 15px 40px rgba(0,0,0,0.1),
+                0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        
+        .stDataFrame table {
+            font-size: 14px !important;
+        }
+        
+        .stDataFrame th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            font-weight: 700 !important;
+            padding: 18px 15px !important;
+            font-size: 14px !important;
+        }
+        
+        .stDataFrame td {
+            padding: 15px !important;
+            font-size: 14px !important;
+        }
+        
+        /* ========================================
+           🔘 BOTÕES - CALL TO ACTION
+           ======================================== */
+        .stButton > button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 16px;
+            box-shadow: 
+                0 15px 40px rgba(102, 126, 234, 0.45),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 25px 60px rgba(102, 126, 234, 0.55),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+        }
+        
+        .stButton > button:active {
+            transform: translateY(-2px);
+        }
+        
+        /* ========================================
+           📊 GRÁFICOS PLOTLY - CONTAINER
+           ======================================== */
+        .js-plotly-plot {
+            border-radius: 20px;
+            box-shadow: 
+                0 15px 45px rgba(0,0,0,0.1),
+                0 5px 20px rgba(0,0,0,0.05);
+            background: white;
+            padding: 10px;
+        }
+        
+        /* ========================================
+           ℹ️ INFO BOXES - PREMIUM STYLE
+           ======================================== */
+        .stAlert {
+            border-radius: 16px;
+            border-left-width: 6px;
+            padding: 20px;
+            font-size: 15px;
+        }
+        
+        /* ========================================
+           📋 EXPANDERS - ELEGANT STYLE
+           ======================================== */
+        .streamlit-expanderHeader {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: #1a1a2e;
+            padding: 15px 0;
+        }
+        
+        /* ========================================
+           🗂️ SIDEBAR - CLEAN DESIGN
+           ======================================== */
+        .css-1d391kg {
+            background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+        }
+        
+        .sidebar .sidebar-content {
+            padding: 20px;
+        }
+        
+        /* ========================================
+           🎯 FILTRO DE PERÍODO - DESTAQUE
+           ======================================== */
+        .filtro-periodo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px 35px;
+            border-radius: 20px;
+            margin-bottom: 35px;
+            box-shadow: 
+                0 15px 45px rgba(102, 126, 234, 0.35),
+                inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        
+        /* ========================================
+           📝 LEGENDA DOS KPIs - BOX PREMIUM
+           ======================================== */
+        .legenda-box {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            border: 3px solid #54a0ff;
+            border-left: 10px solid #54a0ff;
+            border-radius: 20px;
+            padding: 35px 40px;
+            margin: 35px 0;
+            box-shadow: 
+                0 15px 40px rgba(84, 160, 255, 0.15),
+                0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .legenda-box h3 {
+            color: #0c5460;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .legenda-item {
+            margin: 12px 0;
+            padding: 15px 20px;
+            border-radius: 14px;
+            border-left: 5px solid;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+        
+        .legenda-item:hover {
+            transform: translateX(5px);
+        }
+        
+        /* ========================================
+           🏆 RANKING CARDS - TOP 3
+           ======================================== */
+        .ranking-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin: 15px 0;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.1),
+                0 5px 15px rgba(0,0,0,0.05);
+            border: 3px solid;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .ranking-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+        
+        .ranking-card.ouro { border-color: #ffd700; }
+        .ranking-card.prata { border-color: #c0c0c0; }
+        .ranking-card.bronze { border-color: #cd7f32; }
+        
+        /* ========================================
+           📱 RESPONSIVIDADE
+           ======================================== */
+        @media (max-width: 768px) {
+            .main-header h1 { font-size: 2.5rem; }
+            .main-header h2 { font-size: 1.2rem; }
+            .section-header h2 { font-size: 1.4rem; }
+        }
+        
+        /* ========================================
+           ✨ ANIMAÇÕES SUAVES
+           ======================================== */
+        * {
+            transition: background-color 0.3s ease, 
+                        border-color 0.3s ease,
+                        box-shadow 0.3s ease;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # =========================================================================
+    # 🎬 HEADER PRINCIPAL - OSCAR STYLE
+    # =========================================================================
+    st.markdown("""
+    <div class="main-header">
+        <h1>🏆 ASSERTIF CORRETORA</h1>
+        <h2>Dashboard Financeiro Premium | Oscar Edition 2026</h2>
+        <div class="badge">📊 YTD Janeiro - Abril 2026 • Versão 6.0</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # =========================================================================
+    # 📂 SIDEBAR PREMIUM
+    # =========================================================================
+    with st.sidebar:
+        st.markdown("""
+        <div style="text-align: center; padding: 20px 0;">
+            <span style="font-size: 3rem;">📊</span>
+            <h2 style="color: #667eea; margin: 15px 0 5px 0; font-weight: 800;">ASSERTIF</h2>
+            <p style="color: #6c757d; font-size: 0.9rem;">Dashboard Premium</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        st.markdown("### 📁 Upload de Dados")
+        uploaded_file = st.file_uploader(
+            "Arraste sua planilha Excel aqui",
+            type=['xlsx', 'xls'],
+            help="Selecione o arquivo Excel com os dados financeiros",
+            key="file_uploader"
+        )
+        
+        st.markdown("---")
+        
+        st.markdown("### ⚙️ Configurações de Exibição")
+        show_tables = st.checkbox("📋 Mostrar tabelas detalhadas", value=True)
+        show_charts = st.checkbox("📈 Mostrar gráficos", value=True)
+        
+        st.markdown("---")
+        
+        st.markdown("""
+        <div style="
+            background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        ">
+            <p style="font-size: 0.85rem; color: #667eea; margin: 0; font-weight: 600;">
+                ✨ Versão Oscar Edition<br/>
+                <span style="font-size: 0.75rem; color: #6c757d;">v6.0 • Maio 2026</span>
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # =========================================================================
+    # 🗓️ FILTRO DE PERÍODO - PREMIUM
+    # =========================================================================
+    st.markdown("""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 20px 35px;
+        border-radius: 20px;
+        margin-bottom: 35px;
+        box-shadow: 0 15px 45px rgba(102, 126, 234, 0.35);
+    ">
+        <h3 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 700;">
+            🗓️ SELECIONE O PERÍODO DE ANÁLISE
+        </h3>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_filtro1, col_filtro2 = st.columns([3, 1])
+    
+    with col_filtro1:
+        meses_opcoes = ['All', 'Janeiro', 'Fevereiro', 'Março', 'Abril']
+        meses_selecionados = st.multiselect(
+            "Selecione o(s) mês(es) para análise:",
+            options=meses_opcoes,
+            default=['All'],
+            help="Selecione 'All' para ver todos os meses ou escolha meses específicos"
+        )
+    
+    with col_filtro2:
+        if 'All' in meses_selecionados or len(meses_selecionados) == 0:
+            st.success("📊 **YTD Completo**")
+        else:
+            st.info(f"📊 **{', '.join(meses_selecionados)}**")
+    
+    # =========================================================================
+    # 📊 PROCESSAMENTO DOS DADOS
+    # =========================================================================
+    df_receitas_clean = None
+    df_despesas_clean = None
+    df_seg = None
+    df_prod = None
+    df_orig = None
+    df_cli = None
+    df_cat = None
+    dados_mensais_atual = DADOS_MENSAIS.copy()
+    
+    if uploaded_file is not None:
+        dados = pd.read_excel(uploaded_file, sheet_name=None)
+        
+        st.sidebar.success(f"✅ Arquivo carregado com sucesso!")
+        st.sidebar.info(f"📑 Abas encontradas: {len(dados.keys())}")
+        
+        df_dre = dados.get('DRE 2026', pd.DataFrame())
+        df_receitas = dados.get('ASSERTIF DIRETO', pd.DataFrame())
+        df_despesas = dados.get('DESPESAS', pd.DataFrame())
+        
+        if len(df_dre) > 0:
+            dados_extraidos = extrair_dados_dre(df_dre)
+            if dados_extraidos:
+                dados_mensais_atual = dados_extraidos
+                st.sidebar.success("✅ Dados da DRE extraídos!")
+        
+        if len(df_receitas) > 0:
+            df_receitas.columns = df_receitas.columns.str.strip()
+            df_receitas_clean = df_receitas.dropna(subset=[df_receitas.columns[12]])
+            
+            col_comissao = df_receitas.columns[12]
+            df_receitas_clean[col_comissao] = pd.to_numeric(
+                df_receitas_clean[col_comissao].astype(str).str.replace(',', '.').str.replace(' ', ''),
+                errors='coerce'
+            ).fillna(0)
+            
+            col_seguradora = df_receitas.columns[4]
+            col_produto = df_receitas.columns[10]
+            col_originador = df_receitas.columns[7]
+            col_cliente = df_receitas.columns[3]
+            
+            df_seg = df_receitas_clean.groupby(col_seguradora)[col_comissao].agg(['sum', 'count', 'mean']).reset_index()
+            df_seg.columns = ['Seguradora', 'Total', 'Qtd', 'Média']
+            df_seg = df_seg[df_seg['Total'] > 0].sort_values('Total', ascending=False)
+            df_seg['% do Total'] = (df_seg['Total'] / df_seg['Total'].sum() * 100).round(1)
+            
+            df_prod = df_receitas_clean.groupby(col_produto)[col_comissao].agg(['sum', 'count', 'mean']).reset_index()
+            df_prod.columns = ['Produto', 'Total', 'Qtd', 'Média']
+            df_prod = df_prod[df_prod['Total'] > 0].sort_values('Total', ascending=False)
+            df_prod['% do Total'] = (df_prod['Total'] / df_prod['Total'].sum() * 100).round(1)
+            
+            df_orig = df_receitas_clean.groupby(col_originador)[col_comissao].agg(['sum', 'count', 'mean']).reset_index()
+            df_orig.columns = ['Originador', 'Total', 'Operações', 'Ticket Médio']
+            df_orig = df_orig[df_orig['Total'] > 0].sort_values('Total', ascending=False)
+            df_orig['% do Total'] = (df_orig['Total'] / df_orig['Total'].sum() * 100).round(1)
+            
+            df_cli = df_receitas_clean.groupby(col_cliente)[col_comissao].agg(['sum', 'count', 'mean']).reset_index()
+            df_cli.columns = ['Cliente', 'Total', 'Qtd', 'Média']
+            df_cli = df_cli[df_cli['Total'] > 0].sort_values('Total', ascending=False)
+            df_cli['% do Total'] = (df_cli['Total'] / df_cli['Total'].sum() * 100).round(1)
+        
+        if len(df_despesas) > 0:
+            df_despesas_clean = df_despesas.dropna(how='all')
+            col_valor_desp = df_despesas.columns[4]
+            col_categoria = df_despesas.columns[5]
+            
+            df_despesas_clean[col_valor_desp] = pd.to_numeric(
+                df_despesas_clean[col_valor_desp].astype(str).str.replace(',', '.').str.replace(' ', ''),
+                errors='coerce'
+            ).fillna(0)
+            
+            df_cat = df_despesas_clean.groupby(col_categoria)[col_valor_desp].agg(['sum', 'count']).reset_index()
+            df_cat.columns = ['Categoria', 'Total', 'Qtd']
+            df_cat = df_cat[df_cat['Total'] > 0].sort_values('Total', ascending=False)
+            df_cat['% do Total'] = (df_cat['Total'] / df_cat['Total'].sum() * 100).round(1)
+    
+    # Calcular dados filtrados
+    totais, meses_ativos = calcular_dados_filtrados(meses_selecionados, dados_mensais_atual)
+    
+    # =========================================================================
+    # 💰 SEÇÃO 1: KPIs PRINCIPAIS - OSCAR EDITION
+    # =========================================================================
+    st.markdown("""
+    <div class="section-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <h2>💰 INDICADORES PRINCIPAIS (KPIs)</h2>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    faturamento = totais['receita_bruta']
+    custos_totais = totais['custos_totais']
+    margem_contrib = totais['margem_contrib']
+    despesas_total = totais['despesas']
+    resultado_op = totais['resultado_op']
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        st.markdown(criar_cartao_kpi_html(
+            "FATURAMENTO", 
+            formatar_moeda(faturamento), 
+            "Receita Bruta Total", 
+            "#667eea", 
+            "💰"
+        ), unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(criar_cartao_kpi_html(
+            "CUSTOS TOTAIS", 
+            formatar_moeda(custos_totais), 
+            "Impostos + DA + Rebate", 
+            "#ff6b6b", 
+            "📉"
+        ), unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(criar_cartao_kpi_html(
+            "MARGEM CONTRIB.", 
+            formatar_moeda(margem_contrib), 
+            "Faturamento - Custos", 
+            "#54a0ff", 
+            "📊"
+        ), unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(criar_cartao_kpi_html(
+            "DESPESAS TOTAIS", 
+            formatar_moeda(despesas_total), 
+            "Operacional + Folha", 
+            "#feca57", 
+            "💸"
+        ), unsafe_allow_html=True)
+    
+    with col5:
+        cor_resultado = "#00d4aa" if resultado_op >= 0 else "#ff6b6b"
+        icone_resultado = "🎯" if resultado_op >= 0 else "⚠️"
+        st.markdown(criar_cartao_kpi_html(
+            "RESULTADO OPER.", 
+            formatar_moeda(resultado_op), 
+            "Linha 27 DRE", 
+            cor_resultado, 
+            icone_resultado
+        ), unsafe_allow_html=True)
+    
+    # =========================================================================
+    # 📌 LEGENDA DOS KPIs - BOX PREMIUM
+    # =========================================================================
+    st.markdown("""
+    <div class="legenda-box">
+        <h3>📌 Legenda dos Indicadores</h3>
+        <div style="color: #1a1a2e; font-size: 1.1rem; line-height: 2.2;">
+            <div class="legenda-item" style="background: rgba(102, 126, 234, 0.1); border-color: #667eea;">
+                <strong style="color: #667eea;">💰 Faturamento Bruto:</strong> 
+                <span>Soma da Receita Bruta de Produção Direta e Portal MAAS</span>
+            </div>
+            <div class="legenda-item" style="background: rgba(255, 107, 107, 0.1); border-color: #ff6b6b;">
+                <strong style="color: #ff6b6b;">📉 Custos Totais:</strong> 
+                <span>Impostos Diretos + Custo Operacional (D.A.) + Rebate AAI - Co-corretagem</span>
+            </div>
+            <div class="legenda-item" style="background: rgba(84, 160, 255, 0.1); border-color: #54a0ff;">
+                <strong style="color: #54a0ff;">📊 Margem de Contribuição:</strong> 
+                <span>Faturamento Bruto menos Custos Totais (Prod. Direta + Portal MAAS)</span>
+            </div>
+            <div class="legenda-item" style="background: rgba(254, 202, 87, 0.1); border-color: #feca57;">
+                <strong style="color: #e0a800;">💸 Despesas Totais:</strong> 
+                <span>Despesas Operacionais + Folha + Terceiros</span>
+            </div>
+            <div class="legenda-item" style="background: rgba(0, 212, 170, 0.1); border-color: #00d4aa;">
+                <strong style="color: #00d4aa;">🎯 Resultado Operacional:</strong> 
+                <span>Margem de Contribuição - Despesas (Linha 27 da DRE) • Base para distribuição 65/35</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # =========================================================================
+    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL - GRÁFICOS OSCAR
+    # =========================================================================
+    if show_charts:
+        st.markdown("""
+        <div class="section-header" style="background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);">
+            <h2>📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        meses = list(dados_mensais_atual.keys())
+        receita_bruta = [dados_mensais_atual[m]['receita_bruta'] for m in meses]
+        resultado_op_mensal = [dados_mensais_atual[m]['resultado_op'] for m in meses]
+        
+        crescimento = [0]
+        for i in range(1, len(receita_bruta)):
+            if receita_bruta[i-1] > 0:
+                cresc = ((receita_bruta[i] - receita_bruta[i-1]) / receita_bruta[i-1]) * 100
+            else:
+                cresc = 0
+            crescimento.append(round(cresc, 1))
+        
+        fig_evolucao = make_subplots(
+            rows=1, cols=3,
+            subplot_titles=(
+                '<b>📊 Receita Bruta por Mês</b>',
+                '<b>📈 Crescimento Mensal (%)</b>',
+                '<b>🎯 Resultado Operacional</b>'
+            ),
+            horizontal_spacing=0.08,
+            column_widths=[0.35, 0.30, 0.35]
+        )
+        
+        # Gráfico 1: Receita Bruta
+        fig_evolucao.add_trace(
+            go.Bar(
+                x=meses, y=receita_bruta,
+                marker=dict(
+                    color=receita_bruta, 
+                    colorscale='Viridis', 
+                    showscale=False, 
+                    line=dict(width=3, color='white'),
+                    cornerradius=8
+                ),
+                text=[f"R$ {v/1000:.1f}K" for v in receita_bruta],
+                textposition='outside',
+                textfont=dict(size=16, color='#1a1a2e', family='Arial Black'),
+                name='Receita Bruta',
+                hovertemplate='<b>%{x}</b><br>Receita: R$ %{y:,.0f}<extra></extra>',
+                width=0.6
+            ),
+            row=1, col=1
+        )
+        
+        # Gráfico 2: Crescimento Mensal
+        cores_cresc = ['#00d4aa' if c >= 0 else '#ff6b6b' for c in crescimento]
+        cores_cresc[0] = '#6c757d'
+        fig_evolucao.add_trace(
+            go.Scatter(
+                x=meses, y=crescimento,
+                mode='lines+markers+text',
+                line=dict(color='#667eea', width=5, shape='spline'),
+                marker=dict(size=22, color=cores_cresc, line=dict(width=4, color='white'), symbol='circle'),
+                text=[f"{v:+.1f}%" for v in crescimento],
+                textposition='top center',
+                textfont=dict(size=15, family='Arial Black', color='#1a1a2e'),
+                name='Crescimento %',
+                hovertemplate='<b>%{x}</b><br>Crescimento: %{y:+.1f}%<extra></extra>'
+            ),
+            row=1, col=2
+        )
+        
+        fig_evolucao.add_hline(y=0, line_dash="dash", line_color="#ff6b6b", line_width=3, row=1, col=2)
+        
+        # Gráfico 3: Resultado Operacional
+        cores_resultado = ['#00d4aa' if r >= 0 else '#ff6b6b' for r in resultado_op_mensal]
+        fig_evolucao.add_trace(
+            go.Bar(
+                x=meses, y=resultado_op_mensal,
+                marker=dict(
+                    color=cores_resultado, 
+                    line=dict(width=3, color='white'),
+                    cornerradius=8
+                ),
+                text=[f"R$ {v/1000:.1f}K" for v in resultado_op_mensal],
+                textposition='outside',
+                textfont=dict(size=16, family='Arial Black', color='#1a1a2e'),
+                name='Resultado',
+                hovertemplate='<b>%{x}</b><br>Resultado: R$ %{y:,.0f}<extra></extra>',
+                width=0.6
+            ),
+            row=1, col=3
+        )
+        
+        fig_evolucao.add_hline(y=0, line_dash="solid", line_color="#ff6b6b", line_width=3, row=1, col=3)
+        
+        fig_evolucao.update_layout(
+            height=550,
+            showlegend=False,
+            paper_bgcolor='white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font=dict(family='Inter, Segoe UI', size=14, color='#1a1a2e'),
+            hoverlabel=dict(bgcolor='white', font_size=15, bordercolor='#667eea'),
+            margin=dict(l=70, r=70, t=100, b=70)
+        )
+        
+        fig_evolucao.update_xaxes(
+            gridcolor='#e8e8e8', 
+            tickfont=dict(size=14, family='Inter', color='#1a1a2e'), 
+            tickangle=0
+        )
+        fig_evolucao.update_yaxes(
+            gridcolor='#e8e8e8', 
+            tickfont=dict(size=13, family='Inter')
+        )
+        
+        st.plotly_chart(fig_evolucao, use_container_width=True)
+    
+    # =========================================================================
+    # 🏆 SEÇÃO 3: RANKING DE SEGURADORAS
+    # =========================================================================
+    if show_charts and df_seg is not None and len(df_seg) > 0:
+        st.markdown("""
+        <div class="section-header" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+            <h2>🏆 RANKING - MAIORES COMISSÕES POR SEGURADORA</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        fig_ranking_seg = go.Figure()
+        
+        fig_ranking_seg.add_trace(go.Bar(
+            y=df_seg['Seguradora'].head(15),
+            x=df_seg['Total'].head(15),
+            orientation='h',
+            marker=dict(
+                color=df_seg['Total'].head(15),
+                colorscale='Viridis',
+                showscale=True,
+                colorbar=dict(
+                    title=dict(text='Comissão (R$)', font=dict(size=13, family='Inter')), 
+                    thickness=18, 
+                    len=0.7
+                ),
+                line=dict(width=2, color='white'),
+                cornerradius=6
+            ),
+            text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_seg['Total'].head(15), df_seg['% do Total'].head(15))],
+            textposition='outside',
+            textfont=dict(size=13, family='Inter', color='#1a1a2e', weight='bold'),
+            hovertemplate='<b>%{y}</b><br>Comissão: R$ %{x:,.2f}<extra></extra>',
+            width=0.7
+        ))
+        
+        fig_ranking_seg.update_layout(
+            title=dict(
+                text='🏢 Top 15 Seguradoras por Volume de Comissão', 
+                font=dict(size=22, family='Inter', color='#1a1a2e', weight='bold'), 
+                x=0.5, 
+                xanchor='center'
+            ),
+            height=700,
+            paper_bgcolor='white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            xaxis_title=dict(text='Comissão Total (R$)', font=dict(size=15, family='Inter', weight='bold')),
+            yaxis=dict(categoryorder='total ascending', tickfont=dict(size=13, family='Inter')),
+            font=dict(family='Inter', size=13),
+            margin=dict(l=200, r=180, t=100, b=70)
+        )
+        
+        fig_ranking_seg.update_xaxes(gridcolor='#e8e8e8', tickformat=',.0f')
+        st.plotly_chart(fig_ranking_seg, use_container_width=True)
+    
+    # =========================================================================
+    # 🤝 SEÇÃO 4: DISTRIBUIÇÃO ENTRE SÓCIOS
+    # =========================================================================
+    if show_charts:
+        st.markdown("""
+        <div class="section-header" style="background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);">
+            <h2>🤝 DISTRIBUIÇÃO DE RESULTADOS - SÓCIOS</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        meses_dist = list(dados_mensais_atual.keys())
+        resultado_linha27 = [dados_mensais_atual[m]['resultado_op'] for m in meses_dist]
+        partner = [int(r * 0.65) for r in resultado_linha27]
+        maldivas = [int(r * 0.35) for r in resultado_linha27]
+        
+        fig_dist = go.Figure()
+        
+        fig_dist.add_trace(go.Bar(
+            name='Partner (65%)',
+            x=meses_dist,
+            y=partner,
+            marker_color='#667eea',
+            marker_line=dict(width=3, color='white'),
+            text=[f"R$ {v/1000:.1f}K" for v in partner],
+            textposition='outside',
+            textfont=dict(size=16, family='Inter', weight='bold'),
+            width=0.35
+        ))
+        
+        fig_dist.add_trace(go.Bar(
+            name='Maldivas (35%)',
+            x=meses_dist,
+            y=maldivas,
+            marker_color='#f093fb',
+            marker_line=dict(width=3, color='white'),
+            text=[f"R$ {v/1000:.1f}K" for v in maldivas],
+            textposition='outside',
+            textfont=dict(size=16, family='Inter', weight='bold'),
+            width=0.35
+        ))
+        
+        fig_dist.add_trace(go.Scatter(
+            name='Resultado Total (Linha 27)',
+            x=meses_dist,
+            y=resultado_linha27,
+            mode='lines+markers+text',
+            line=dict(color='#00d4aa', width=4, dash='dot'),
+            marker=dict(
+                size=16, 
+                color=['#00d4aa' if r >= 0 else '#ff6b6b' for r in resultado_linha27], 
+                line=dict(width=3, color='white')
+            ),
+            text=[f"R$ {v/1000:.1f}K" for v in resultado_linha27],
+            textposition='top center',
+            textfont=dict(size=14, family='Inter', color='#1a1a2e', weight='bold'),
+        ))
+        
+        fig_dist.add_hline(y=0, line_dash="solid", line_color="#ff6b6b", line_width=3)
+        
+        min_val = min(min(partner), min(maldivas), min(resultado_linha27))
+        max_val = max(max(partner), max(maldivas), max(resultado_linha27))
+        y_range = [min_val * 1.4 if min_val < 0 else -1000, max_val * 1.4]
+        
+        fig_dist.update_layout(
+            title=dict(
+                text='📊 Distribuição do Resultado (Linha 27) - Partner 65% / Maldivas 35%',
+                font=dict(size=22, family='Inter', color='#1a1a2e', weight='bold'),
+                x=0.5,
+                xanchor='center'
+            ),
+            height=550,
+            paper_bgcolor='white',
+            plot_bgcolor='rgba(0,0,0,0)',
+            barmode='group',
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=-0.22,
+                xanchor='center',
+                x=0.5,
+                font=dict(size=15, family='Inter', weight='bold')
+            ),
+            font=dict(family='Inter', size=14),
+            margin=dict(l=70, r=70, t=120, b=120),
+            yaxis=dict(
+                title='Valor (R$)',
+                gridcolor='#e8e8e8',
+                range=y_range,
+                tickformat=',.0f',
+                tickfont=dict(size=13)
+            ),
+            xaxis=dict(
+                title='',
+                tickfont=dict(size=16, family='Inter', weight='bold')
+            )
+        )
+        
+        st.plotly_chart(fig_dist, use_container_width=True)
+        
+        total_resultado = sum(resultado_linha27)
+        partner_total = int(total_resultado * 0.65)
+        maldivas_total = int(total_resultado * 0.35)
+        
+        if total_resultado >= 0:
+            st.success(f"""
+            ✅ **TOTAIS YTD (Linha 27):** 
+            Resultado = **{formatar_moeda(total_resultado)}** 
+            → Partner (65%): **{formatar_moeda(partner_total)}** 
+            | Maldivas (35%): **{formatar_moeda(maldivas_total)}** 
+            | **STATUS: LUCRO**
+            """)
+        else:
+            st.error(f"""
+            ⚠️ **TOTAIS YTD (Linha 27):** 
+            Resultado = **{formatar_moeda(total_resultado)}** 
+            → Partner (65%): **{formatar_moeda(partner_total)}** 
+            | Maldivas (35%): **{formatar_moeda(maldivas_total)}** 
+            | **STATUS: PREJUÍZO**
+            """)
+    
+    # =========================================================================
+    # 📦 SEÇÃO 5: ANÁLISE POR PRODUTO
+    # =========================================================================
+    if show_charts and df_prod is not None and len(df_prod) > 0:
+        st.markdown("""
+        <div class="section-header" style="background: linear-gradient(135deg, #feca57 0%, #ff9f43 100%);">
+            <h2 style="color: #1a1a2e;">📦 ANÁLISE POR TIPO DE PRODUTO</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            fig_prod = px.sunburst(
+                df_prod, 
+                path=['Produto'], 
+                values='Total', 
+                color='Total', 
+                color_continuous_scale='YlOrRd', 
+                title='☀️ Distribuição por Produto (Sunburst)'
+            )
+            fig_prod.update_layout(
+                height=600, 
+                paper_bgcolor='white', 
+                font=dict(family='Inter', size=13),
+                title=dict(
+                    font=dict(size=20, family='Inter', color='#1a1a2e', weight='bold'), 
+                    x=0.5, 
+                    xanchor='center'
+                ), 
+                margin=dict(l=40, r=40, t=100, b=40)
+            )
+            fig_prod.update_traces(
+                textinfo='label+percent entry', 
+                textfont=dict(size=14, family='Inter'),
+                hovertemplate='<b>%{label}</b><br>Comissão: R$ %{value:,.2f}<br>Participação: %{percentEntry:.1%}<extra></extra>'
+            )
+            st.plotly_chart(fig_prod, use_container_width=True)
+        
+        with col2:
+            fig_prod_bar = go.Figure()
+            fig_prod_bar.add_trace(go.Bar(
+                y=df_prod['Produto'], 
+                x=df_prod['Total'], 
+                orientation='h',
+                marker=dict(
+                    color=df_prod['Total'], 
+                    colorscale='YlOrRd', 
+                    showscale=True,
+                    colorbar=dict(
+                        title=dict(text='Comissão', font=dict(size=12)), 
+                        thickness=15, 
+                        len=0.7
+                    ), 
+                    line=dict(width=2, color='white'),
+                    cornerradius=5
+                ),
+                text=[f"R$ {v/1000:.1f}K ({p:.1f}%)" for v, p in zip(df_prod['Total'], df_prod['% do Total'])],
+                textposition='outside', 
+                textfont=dict(size=13, family='Inter', color='#1a1a2e'),
+                hovertemplate='<b>%{y}</b><br>Comissão: R$ %{x:,.2f}<extra></extra>', 
+                width=0.7
+            ))
+            fig_prod_bar.update_layout(
+                title=dict(
+                    text='📊 Comissão por Tipo de Produto', 
+                    font=dict(size=20, family='Inter', color='#1a1a2e', weight='bold'), 
+                    x=0.5, 
+                    xanchor='center'
+                ),
+                height=550, 
+                paper_bgcolor='white', 
+                plot_bgcolor='rgba(0,0,0,0)',
+                xaxis_title=dict(text='Comissão Total (R$)', font=dict(size=14, family='Inter')),
+                yaxis=dict(categoryorder='total ascending', tickfont=dict(size=12, family='Inter')),
+                font=dict(family='Inter', size=13), 
+                margin=dict(l=180, r=150, t=100, b=70)
+            )
+            fig_prod_bar.update_xaxes(gridcolor='#e8e8e8', tickformat=',.0f')
+            st.plotly_chart(fig_prod_bar, use_container_width=True)
+    
+    # =========================================================================
+    # 👥 SEÇÃO 6: RANKING DE ORIGINADORES
+    # =========================================================================
+    if show_charts and df_orig is not None and len(df_orig) > 0:
+        st.markdown("""
+        <div class="section-header" style="background: linear-gradient(135deg, #54a0ff 0%, #00d4aa 100%);">
+            <h2>👥 RANKING - TOP ORIGINADORES</h2>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            fig_orig = go.Figure()
+            top_5 = df_orig.head(5)
+            outros_total = df_orig.iloc[5:]['Total'].sum() if len(df_orig) > 5 else 0
+            outros_perc = df_orig.iloc[5:]['% do Total'].sum() if len(df_orig) > 5 else 0
             
             if outros_total > 0:
                 outros = pd.DataFrame({
