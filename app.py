@@ -123,10 +123,13 @@ def formatar_percentual(valor):
     except:
         return str(valor)
 
-def calcular_dados_filtrados(meses_selecionados):
+def calcular_dados_filtrados(meses_selecionados, dados_mensais_atual=None):
     """Calcula os totais baseado nos meses selecionados"""
+    # Usa os dados passados ou os dados padrão
+    dados_para_usar = dados_mensais_atual if dados_mensais_atual is not None else DADOS_MENSAIS
+    
     if 'All' in meses_selecionados or len(meses_selecionados) == 0:
-        meses_selecionados = list(DADOS_MENSAIS.keys())
+        meses_selecionados = list(dados_para_usar.keys())
     
     totais = {
         'receita_bruta': 0,
@@ -137,11 +140,89 @@ def calcular_dados_filtrados(meses_selecionados):
     }
     
     for mes in meses_selecionados:
-        if mes in DADOS_MENSAIS:
+        if mes in dados_para_usar:
             for key in totais:
-                totais[key] += DADOS_MENSAIS[mes][key]
+                totais[key] += dados_para_usar[mes][key]
     
     return totais, meses_selecionados
+
+def extrair_dados_dre(df_dre):
+    """Extrai os dados mensais da aba DRE 2026 do Excel carregado"""
+    dados_extraidos = {}
+    
+    meses_map = {
+        'C': 'Janeiro',
+        'D': 'Fevereiro', 
+        'E': 'Março',
+        'F': 'Abril',
+        'G': 'Maio',
+        'H': 'Junho',
+        'I': 'Julho',
+        'J': 'Agosto',
+        'K': 'Setembro',
+        'L': 'Outubro',
+        'M': 'Novembro',
+        'N': 'Dezembro'
+    }
+    
+    try:
+        # Encontrar as linhas corretas baseado no conteúdo
+        for idx, row in df_dre.iterrows():
+            first_col = str(row.iloc[0]).strip() if pd.notna(row.iloc[0]) else ""
+            
+            # Linha 4 - RECEITA BRUTA TOTAL
+            if 'RECEITA BRUTA TOTAL' in first_col.upper():
+                for col_idx, mes_nome in enumerate(['Janeiro', 'Fevereiro', 'Março', 'Abril'], start=1):
+                    if mes_nome not in dados_extraidos:
+                        dados_extraidos[mes_nome] = {}
+                    val = row.iloc[col_idx] if col_idx < len(row) else 0
+                    dados_extraidos[mes_nome]['receita_bruta'] = float(val) if pd.notna(val) else 0
+            
+            # Linha 12 - MARGEM DE CONTRIBUIÇÃO (Produção Direta)
+            if '(=) MARGEM DE CONTRIBUIÇÃO' in first_col or 'MARGEM DE CONTRIBUIÇÃO' in first_col.upper():
+                for col_idx, mes_nome in enumerate(['Janeiro', 'Fevereiro', 'Março', 'Abril'], start=1):
+                    if mes_nome not in dados_extraidos:
+                        dados_extraidos[mes_nome] = {}
+                    val = row.iloc[col_idx] if col_idx < len(row) else 0
+                    dados_extraidos[mes_nome]['margem_contrib'] = float(val) if pd.notna(val) else 0
+            
+            # Linha 27 - RESULTADO OPERACIONAL
+            if 'RESULTADO OPERACIONAL' in first_col.upper() and 'DISTRIBUIÇÃO' not in first_col.upper():
+                for col_idx, mes_nome in enumerate(['Janeiro', 'Fevereiro', 'Março', 'Abril'], start=1):
+                    if mes_nome not in dados_extraidos:
+                        dados_extraidos[mes_nome] = {}
+                    val = row.iloc[col_idx] if col_idx < len(row) else 0
+                    dados_extraidos[mes_nome]['resultado_op'] = float(val) if pd.notna(val) else 0
+            
+            # Linha 13 - DESPESAS
+            if first_col.upper() == 'DESPESAS' or first_col.upper().startswith('DESPESAS '):
+                for col_idx, mes_nome in enumerate(['Janeiro', 'Fevereiro', 'Março', 'Abril'], start=1):
+                    if mes_nome not in dados_extraidos:
+                        dados_extraidos[mes_nome] = {}
+                    val = row.iloc[col_idx] if col_idx < len(row) else 0
+                    val = float(val) if pd.notna(val) else 0
+                    dados_extraidos[mes_nome]['despesas'] = abs(val)
+            
+            # Linha 14 - FOLHA+TERCEIROS
+            if 'FOLHA' in first_col.upper() and 'TERCEIROS' in first_col.upper():
+                for col_idx, mes_nome in enumerate(['Janeiro', 'Fevereiro', 'Março', 'Abril'], start=1):
+                    if mes_nome in dados_extraidos:
+                        val = row.iloc[col_idx] if col_idx < len(row) else 0
+                        val = float(val) if pd.notna(val) else 0
+                        # Soma à despesa existente
+                        dados_extraidos[mes_nome]['despesas'] = dados_extraidos[mes_nome].get('despesas', 0) + abs(val)
+        
+        # Calcular custos_totais = receita_bruta - margem_contrib
+        for mes in dados_extraidos:
+            receita = dados_extraidos[mes].get('receita_bruta', 0)
+            margem = dados_extraidos[mes].get('margem_contrib', 0)
+            dados_extraidos[mes]['custos_totais'] = receita - margem
+        
+        return dados_extraidos if dados_extraidos else None
+        
+    except Exception as e:
+        print(f"Erro ao extrair dados DRE: {e}")
+        return None
 
 def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], icone="📊"):
     """Cria HTML para cartão de KPI estilizado"""
@@ -1249,7 +1330,8 @@ def main():
         uploaded_file = st.file_uploader(
             "Faça upload da planilha Excel",
             type=['xlsx', 'xls'],
-            help="Selecione o arquivo Excel com os dados financeiros"
+            help="Selecione o arquivo Excel com os dados financeiros",
+            key="file_uploader"
         )
         
         st.markdown("---")
@@ -1291,9 +1373,6 @@ def main():
         else:
             st.info(f"📊 **Período:** {', '.join(meses_selecionados)}")
     
-    # Calcular dados filtrados
-    totais, meses_ativos = calcular_dados_filtrados(meses_selecionados)
-    
     # Variáveis para armazenar dados processados
     df_receitas_clean = None
     df_despesas_clean = None
@@ -1302,6 +1381,7 @@ def main():
     df_orig = None
     df_cli = None
     df_cat = None
+    dados_mensais_atual = DADOS_MENSAIS.copy()  # Inicializa com dados padrão
     
     if uploaded_file is not None:
         # Carregar dados
@@ -1317,6 +1397,13 @@ def main():
         df_inputs = dados.get('INPUTS', pd.DataFrame())
         df_resumo = dados.get('RESUMO DRE', pd.DataFrame())
         df_portal = dados.get('EXTRATO PORTAL MAAS', pd.DataFrame())
+        
+        # EXTRAIR DADOS DA DRE PARA ATUALIZAÇÃO AUTOMÁTICA
+        if len(df_dre) > 0:
+            dados_extraidos = extrair_dados_dre(df_dre)
+            if dados_extraidos:
+                dados_mensais_atual = dados_extraidos
+                st.sidebar.success("✅ Dados da DRE extraídos automaticamente!")
         
         # Processar RECEITAS
         if len(df_receitas) > 0:
@@ -1375,6 +1462,9 @@ def main():
             df_cat.columns = ['Categoria', 'Total', 'Qtd']
             df_cat = df_cat[df_cat['Total'] > 0].sort_values('Total', ascending=False)
             df_cat['% do Total'] = (df_cat['Total'] / df_cat['Total'].sum() * 100).round(1)
+    
+    # Calcular dados filtrados USANDO OS DADOS ATUALIZADOS DA PLANILHA
+    totais, meses_ativos = calcular_dados_filtrados(meses_selecionados, dados_mensais_atual)
     
     # =============================================================================
     # 💰 SEÇÃO 1: KPIs PRINCIPAIS - COM 5 INDICADORES
@@ -1469,10 +1559,19 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril']
-        receita_bruta = [DADOS_MENSAIS[m]['receita_bruta'] for m in meses]
-        resultado_op_mensal = [DADOS_MENSAIS[m]['resultado_op'] for m in meses]
-        crescimento = [0, 17.2, 45.3, -80.1]
+        # USAR DADOS ATUALIZADOS DA PLANILHA
+        meses = list(dados_mensais_atual.keys())
+        receita_bruta = [dados_mensais_atual[m]['receita_bruta'] for m in meses]
+        resultado_op_mensal = [dados_mensais_atual[m]['resultado_op'] for m in meses]
+        
+        # Calcular crescimento
+        crescimento = [0]
+        for i in range(1, len(receita_bruta)):
+            if receita_bruta[i-1] > 0:
+                cresc = ((receita_bruta[i] - receita_bruta[i-1]) / receita_bruta[i-1]) * 100
+            else:
+                cresc = 0
+            crescimento.append(round(cresc, 1))
         
         fig_evolucao = make_subplots(
             rows=1, cols=3,
@@ -1501,7 +1600,8 @@ def main():
         )
         
         # Gráfico 2: Crescimento Mensal
-        cores_cresc = ['#6c757d', '#28a745', '#28a745', '#dc3545']
+        cores_cresc = ['#28a745' if c >= 0 else '#dc3545' for c in crescimento]
+        cores_cresc[0] = '#6c757d'  # Primeiro mês sem comparação
         fig_evolucao.add_trace(
             go.Scatter(
                 x=meses, y=crescimento,
@@ -1608,9 +1708,9 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Dados da Linha 27 por mês
-        meses_dist = ['Janeiro', 'Fevereiro', 'Março', 'Abril']
-        resultado_linha27 = [DADOS_MENSAIS[m]['resultado_op'] for m in meses_dist]
+        # Dados da Linha 27 por mês - USAR DADOS ATUALIZADOS
+        meses_dist = list(dados_mensais_atual.keys())
+        resultado_linha27 = [dados_mensais_atual[m]['resultado_op'] for m in meses_dist]
         partner = [int(r * 0.65) for r in resultado_linha27]  # 65%
         maldivas = [int(r * 0.35) for r in resultado_linha27]  # 35%
         
@@ -1678,7 +1778,7 @@ def main():
             yaxis=dict(
                 title='Valor (R$)',
                 gridcolor='#e8e8e8',
-                range=[0, max(resultado_linha27) * 1.35],
+                range=[0, max(resultado_linha27) * 1.35] if max(resultado_linha27) > 0 else [0, 100],
                 tickformat=',.0f'
             ),
             xaxis=dict(
@@ -1689,7 +1789,7 @@ def main():
         
         st.plotly_chart(fig_dist, use_container_width=True)
         
-        # Totais YTD (apenas informativo)
+        # Totais YTD (apenas informativo) - USAR DADOS ATUALIZADOS
         total_resultado = sum(resultado_linha27)
         partner_total = int(total_resultado * 0.65)
         maldivas_total = int(total_resultado * 0.35)
@@ -1866,7 +1966,7 @@ def main():
         </div>
         """, unsafe_allow_html=True)
         
-        # Tabela de resumo
+        # Tabela de resumo - USANDO DADOS ATUALIZADOS
         resumo_data = {
             'Indicador': [
                 '💰 FATURAMENTO BRUTO',
