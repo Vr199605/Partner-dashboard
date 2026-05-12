@@ -62,6 +62,7 @@ CORES = {
     'ouro': '#ffd700',
     'prata': '#c0c0c0',
     'bronze': '#cd7f32',
+    'azul_claro': '#7dd3fc',
     'gradiente': ['#0a1628', '#1a3a5c', '#2e86ab', '#4ea8de', '#7dd3fc', '#bae6fd'],
     'chart_colors': ['#0a1628', '#1a3a5c', '#2e86ab', '#4ea8de', '#00d4aa', '#7dd3fc', '#bae6fd', '#e0f2fe']
 }
@@ -309,7 +310,7 @@ def extrair_dados_dre(df_dre):
 
 
 def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], icone="📊", tamanho="normal"):
-    """Cria HTML para cartão de KPI estilizado - VERSÃO AZUL MALDIVAS"""
+    """Cria HTML para cartão de KPI estilizado - VERSÃO AZUL MALDIVAS - SEM SUBTÍTULO"""
     
     # Tamanhos responsivos
     if tamanho == "grande":
@@ -317,15 +318,13 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], ic
         icone_size = "3rem"
         titulo_size = "1.1rem"
         valor_size = "2.2rem"
-        subtitulo_size = "1rem"
-        min_height = "220px"
+        min_height = "200px"
     else:
         padding = "30px 20px"
         icone_size = "2.8rem"
         titulo_size = "0.95rem"
         valor_size = "1.9rem"
-        subtitulo_size = "0.9rem"
-        min_height = "200px"
+        min_height = "180px"
     
     html = f"""
     <div style="
@@ -386,17 +385,6 @@ def criar_cartao_kpi_html(titulo, valor, subtitulo="", cor=CORES['primaria'], ic
             position: relative;
             z-index: 1;
         ">{valor}</div>
-        <div style="
-            font-size: {subtitulo_size}; 
-            font-weight: 600; 
-            opacity: 0.95; 
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-            background: rgba(255,255,255,0.15);
-            padding: 8px 16px;
-            border-radius: 20px;
-            position: relative;
-            z-index: 1;
-        ">{subtitulo}</div>
     </div>
     """
     return html
@@ -523,40 +511,36 @@ class PDFDashboardGenerator:
         ))
     
     def _create_cover_page(self):
-        """Cria página de capa profissional"""
+        """Cria página de capa profissional - SEM EMOJIS"""
         elements = []
         
-        elements.append(Spacer(1, 2*cm))
+        elements.append(Spacer(1, 3*cm))
         
-        logo_data = [[Paragraph(
-            "<font size='80'>📊</font>",
-            ParagraphStyle(name='LogoStyle', alignment=TA_CENTER, fontSize=80)
-        )]]
-        logo_table = Table(logo_data, colWidths=[18*cm])
-        logo_table.setStyle(TableStyle([
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ]))
-        
+        # Título principal sem emoji
         cover_content = [
-            [logo_table],
+            [Paragraph("<font size='48' color='white'><b>ASSERTIF CORRETORA</b></font>", 
+                      ParagraphStyle(name='CoverMain', alignment=TA_CENTER, fontSize=48, fontName='Helvetica-Bold'))],
+            [Spacer(1, 0.3*cm)],
+            [Paragraph("<font size='36' color='white'><b>DE SEGUROS</b></font>", 
+                      ParagraphStyle(name='CoverMain2', alignment=TA_CENTER, fontSize=36, fontName='Helvetica-Bold'))],
             [Spacer(1, 1*cm)],
-            [Paragraph("ASSERTIF CORRETORA", self.styles['CoverTitle'])],
-            [Paragraph("DE SEGUROS", self.styles['CoverTitle'])],
-            [Spacer(1, 0.5*cm)],
-            [Paragraph("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 
+            [Paragraph("_" * 50, 
                       ParagraphStyle(name='LineCover', alignment=TA_CENTER, textColor=colors.white, fontSize=14))],
+            [Spacer(1, 1*cm)],
+            [Paragraph("<font size='22' color='white'>Dashboard Financeiro</font>", 
+                      ParagraphStyle(name='CoverSub1', alignment=TA_CENTER, fontSize=22, fontName='Helvetica'))],
+            [Spacer(1, 0.3*cm)],
+            [Paragraph("<font size='16' color='white'>Relatorio Executivo | YTD 2026</font>", 
+                      ParagraphStyle(name='CoverSub2', alignment=TA_CENTER, fontSize=16, fontName='Helvetica'))],
+            [Spacer(1, 2*cm)],
+            [Paragraph("<font size='14' color='white'>Periodo: Janeiro a Abril de 2026</font>", 
+                      ParagraphStyle(name='CoverInfo', alignment=TA_CENTER, fontSize=14, fontName='Helvetica'))],
             [Spacer(1, 0.5*cm)],
-            [Paragraph("Dashboard Financeiro", self.styles['CoverSubtitle'])],
-            [Paragraph("Relatório Executivo | YTD 2026", self.styles['CoverSubtitle'])],
+            [Paragraph("<font size='14' color='#00d4aa'><b>Status: LUCRO | Margem: 17%</b></font>", 
+                      ParagraphStyle(name='CoverInfo2', alignment=TA_CENTER, fontSize=14, fontName='Helvetica-Bold'))],
             [Spacer(1, 2*cm)],
-            [Paragraph(f"📅 Período: Janeiro a Abril de 2026", 
-                      ParagraphStyle(name='CoverInfo', alignment=TA_CENTER, textColor=colors.white, fontSize=14, fontName='Helvetica'))],
-            [Paragraph(f"📈 Status: LUCRO | Margem: 11%", 
-                      ParagraphStyle(name='CoverInfo2', alignment=TA_CENTER, textColor=HexColor('#00d4aa'), fontSize=14, fontName='Helvetica-Bold'))],
-            [Spacer(1, 2*cm)],
-            [Paragraph(f"Gerado em: {datetime.now().strftime('%d/%m/%Y às %H:%M')}", 
-                      ParagraphStyle(name='CoverDate', alignment=TA_CENTER, textColor=colors.white, fontSize=11, fontName='Helvetica'))],
+            [Paragraph(f"<font size='11' color='white'>Gerado em: {datetime.now().strftime('%d/%m/%Y as %H:%M')}</font>", 
+                      ParagraphStyle(name='CoverDate', alignment=TA_CENTER, fontSize=11, fontName='Helvetica'))],
         ]
         
         cover_table = Table([[item[0]] for item in cover_content], colWidths=[18*cm])
@@ -573,9 +557,10 @@ class PDFDashboardGenerator:
         elements.append(cover_table)
         elements.append(Spacer(1, 1*cm))
         
+        # Tabela de resumo sem emojis
         info_data = [
-            ['💰 Faturamento YTD', 'R$ 180.797,00', '📊 Margem Contribuição', 'R$ 83.858,00'],
-            ['💸 Despesas Totais', 'R$ 63.068,00', '🎯 Resultado Operacional', 'R$ 20.791,00'],
+            ['FATURAMENTO YTD', 'R$ 178.072,00', 'MARGEM CONTRIBUICAO', 'R$ 82.343,00'],
+            ['DESPESAS TOTAIS', 'R$ 46.050,00', 'RESULTADO OPERACIONAL', 'R$ 29.490,00'],
         ]
         
         info_table = Table(info_data, colWidths=[5*cm, 4*cm, 5*cm, 4*cm])
@@ -603,10 +588,10 @@ class PDFDashboardGenerator:
         return elements
     
     def _create_table_of_contents(self):
-        """Cria sumário/índice do documento"""
+        """Cria sumário/índice do documento - SEM EMOJIS"""
         elements = []
         
-        toc_header = [[Paragraph("<font color='white'><b>📑 SUMÁRIO</b></font>", 
+        toc_header = [[Paragraph("<font color='white'><b>SUMARIO</b></font>", 
                                  ParagraphStyle(name='TOCHeader', alignment=TA_CENTER, fontSize=20, fontName='Helvetica-Bold'))]]
         toc_header_table = Table(toc_header, colWidths=[18*cm])
         toc_header_table.setStyle(TableStyle([
@@ -621,17 +606,17 @@ class PDFDashboardGenerator:
         elements.append(Spacer(1, 1*cm))
         
         toc_items = [
-            ('1.', '💰 Indicadores Principais (KPIs)', '3'),
-            ('2.', '📈 Evolução Mensal - Receita vs Resultado', '3'),
-            ('3.', '🏆 Ranking - Maiores Comissões por Seguradora', '4'),
-            ('4.', '🤝 Distribuição de Resultados - Sócios', '4'),
-            ('5.', '👥 Ranking - Top Originadores', '5'),
-            ('6.', '🏅 Ranking - Maiores Clientes', '5'),
-            ('7.', '📦 Análise por Tipo de Produto', '6'),
-            ('8.', '💸 Ranking - Maiores Despesas', '6'),
-            ('9.', '📋 Resumo Executivo - DRE Completo', '7'),
-            ('10.', '📊 Análise Gráfica Consolidada', '8'),
-            ('11.', '📝 Notas e Observações', '9'),
+            ('1.', 'Indicadores Principais (KPIs)', '3'),
+            ('2.', 'Evolucao Mensal - Receita vs Resultado', '3'),
+            ('3.', 'Ranking - Maiores Comissoes por Seguradora', '4'),
+            ('4.', 'Distribuicao de Resultados - Socios', '4'),
+            ('5.', 'Ranking - Top Originadores', '5'),
+            ('6.', 'Ranking - Maiores Clientes', '5'),
+            ('7.', 'Analise por Tipo de Produto', '6'),
+            ('8.', 'Ranking - Maiores Despesas', '6'),
+            ('9.', 'Resumo Executivo - DRE Completo', '7'),
+            ('10.', 'Analise Grafica Consolidada', '8'),
+            ('11.', 'Notas e Observacoes', '9'),
         ]
         
         toc_data = []
@@ -658,11 +643,11 @@ class PDFDashboardGenerator:
         elements.append(Spacer(1, 2*cm))
         
         info_box = [[Paragraph(
-            "<b>ℹ️ Sobre este Relatório</b><br/><br/>"
-            "Este dashboard apresenta uma visão consolidada do desempenho financeiro da Assertif Corretora "
-            "no período de Janeiro a Abril de 2026. Os dados incluem análise de receitas por seguradora, "
-            "produto, originador e cliente, além da distribuição de resultados entre os sócios e "
-            "evolução mensal dos principais indicadores.",
+            "<b>Sobre este Relatorio</b><br/><br/>"
+            "Este dashboard apresenta uma visao consolidada do desempenho financeiro da Assertif Corretora "
+            "no periodo de Janeiro a Abril de 2026. Os dados incluem analise de receitas por seguradora, "
+            "produto, originador e cliente, alem da distribuicao de resultados entre os socios e "
+            "evolucao mensal dos principais indicadores.",
             ParagraphStyle(name='InfoBox', fontSize=10, textColor=HexColor('#0a1628'), 
                           alignment=TA_JUSTIFY, fontName='Helvetica', leading=14)
         )]]
@@ -682,8 +667,8 @@ class PDFDashboardGenerator:
         
         return elements
     
-    def _create_section_header(self, titulo, cor=HexColor('#0a1628'), icone="📊"):
-        """Cria cabeçalho de seção premium"""
+    def _create_section_header(self, titulo, cor=HexColor('#0a1628'), icone=""):
+        """Cria cabeçalho de seção premium - SEM EMOJIS"""
         section_data = [[
             Paragraph(f"<font color='white'><b>{titulo}</b></font>", 
                      ParagraphStyle(name='SectionHeader', fontSize=14, fontName='Helvetica-Bold', alignment=TA_LEFT))
@@ -701,7 +686,7 @@ class PDFDashboardGenerator:
         return section_table
     
     def _create_kpi_cards(self, kpis):
-        """Cria cards de KPIs com visual premium"""
+        """Cria cards de KPIs com visual premium - SEM EMOJIS"""
         kpi_cells = []
         
         cores_kpi = [
@@ -716,14 +701,11 @@ class PDFDashboardGenerator:
             cor = cores_kpi[i % len(cores_kpi)]
             
             card_content = [
-                [Paragraph(f"<font size='24'>{kpi.get('icone', '📊')}</font>", 
-                          ParagraphStyle(name=f'KPIIcon{i}', alignment=TA_CENTER))],
-                [Paragraph(f"<font size='7' color='white'><b>{kpi['titulo']}</b></font>", 
+                [Paragraph(f"<font size='8' color='white'><b>{kpi['titulo']}</b></font>", 
                           ParagraphStyle(name=f'KPITitle{i}', alignment=TA_CENTER))],
-                [Paragraph(f"<font size='14' color='white'><b>{kpi['valor']}</b></font>", 
+                [Spacer(1, 0.3*cm)],
+                [Paragraph(f"<font size='16' color='white'><b>{kpi['valor']}</b></font>", 
                           ParagraphStyle(name=f'KPIValue{i}', alignment=TA_CENTER))],
-                [Paragraph(f"<font size='6' color='white'>{kpi.get('subtitulo', '')}</font>", 
-                          ParagraphStyle(name=f'KPISub{i}', alignment=TA_CENTER))],
             ]
             
             card_table = Table(card_content, colWidths=[3.4*cm])
@@ -731,8 +713,8 @@ class PDFDashboardGenerator:
                 ('BACKGROUND', (0, 0), (-1, -1), cor),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-                ('TOPPADDING', (0, 0), (-1, -1), 6),
-                ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
                 ('LEFTPADDING', (0, 0), (-1, -1), 4),
                 ('RIGHTPADDING', (0, 0), (-1, -1), 4),
             ]))
@@ -825,7 +807,7 @@ class PDFDashboardGenerator:
         return table
     
     def _create_note_box(self, titulo, texto, cor=HexColor('#2e86ab')):
-        """Cria box de nota explicativa"""
+        """Cria box de nota explicativa - SEM EMOJIS"""
         note_content = [[Paragraph(
             f"<b>{titulo}</b><br/><br/>{texto}",
             ParagraphStyle(name='NoteContent', fontSize=9, textColor=HexColor('#0a1628'), 
@@ -845,12 +827,12 @@ class PDFDashboardGenerator:
         return note_table
     
     def _create_footer(self):
-        """Cria rodapé do documento"""
+        """Cria rodapé do documento - SEM EMOJIS"""
         footer_data = [[
             Paragraph(
-                "<font color='white'><b>✅ ASSERTIF CORRETORA - Dashboard Financeiro</b><br/>"
-                f"📊 Versão 6.0 | 🗓️ Período: Janeiro a Abril 2026 | 📈 Status: LUCRO<br/>"
-                f"Documento gerado automaticamente em {datetime.now().strftime('%d/%m/%Y às %H:%M')}</font>",
+                "<font color='white'><b>ASSERTIF CORRETORA - Dashboard Financeiro</b><br/>"
+                f"Versao 6.0 | Periodo: Janeiro a Abril 2026 | Status: LUCRO<br/>"
+                f"Documento gerado automaticamente em {datetime.now().strftime('%d/%m/%Y as %H:%M')}</font>",
                 ParagraphStyle(
                     name='FooterStyle',
                     parent=self.styles['Normal'],
@@ -875,7 +857,7 @@ class PDFDashboardGenerator:
         return footer_table
     
     def _add_page_number(self, canvas, doc):
-        """Adiciona número de página e cabeçalho/rodapé em cada página"""
+        """Adiciona número de página e cabeçalho/rodapé em cada página - SEM EMOJIS"""
         canvas.saveState()
         
         canvas.setFillColor(HexColor('#0a1628'))
@@ -883,7 +865,7 @@ class PDFDashboardGenerator:
         
         canvas.setFillColor(colors.white)
         canvas.setFont('Helvetica-Bold', 9)
-        canvas.drawString(1.5*cm, A4[1] - 1.1*cm, "📊 ASSERTIF CORRETORA - Dashboard Financeiro")
+        canvas.drawString(1.5*cm, A4[1] - 1.1*cm, "ASSERTIF CORRETORA - Dashboard Financeiro")
         canvas.drawRightString(A4[0] - 1.5*cm, A4[1] - 1.1*cm, f"YTD 2026")
         
         canvas.setFillColor(HexColor('#0a1628'))
@@ -893,7 +875,7 @@ class PDFDashboardGenerator:
         canvas.setFont('Helvetica', 8)
         canvas.drawString(1.5*cm, 0.7*cm, f"Gerado em: {datetime.now().strftime('%d/%m/%Y')}")
         canvas.drawCentredString(A4[0]/2, 0.7*cm, "Confidencial - Uso Interno")
-        canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Página {doc.page}")
+        canvas.drawRightString(A4[0] - 1.5*cm, 0.7*cm, f"Pagina {doc.page}")
         
         canvas.restoreState()
     
@@ -916,44 +898,44 @@ class PDFDashboardGenerator:
         elements.extend(self._create_cover_page())
         elements.extend(self._create_table_of_contents())
         
-        elements.append(self._create_section_header("💰 INDICADORES PRINCIPAIS (KPIs)", HexColor('#0a1628')))
+        elements.append(self._create_section_header("INDICADORES PRINCIPAIS (KPIs)", HexColor('#0a1628')))
         elements.append(Spacer(1, 15))
         
         kpis = [
-            {'titulo': 'FATURAMENTO', 'valor': 'R$ 180.797', 'subtitulo': 'Receita Bruta', 'icone': '💰'},
-            {'titulo': 'CUSTOS TOTAIS', 'valor': 'R$ 96.939', 'subtitulo': 'Impostos+DA+Rebate', 'icone': '📉'},
-            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 83.858', 'subtitulo': 'Fat-Custos', 'icone': '📊'},
-            {'titulo': 'DESPESAS', 'valor': 'R$ 63.066', 'subtitulo': 'Oper.+Folha', 'icone': '💸'},
-            {'titulo': 'RESULTADO', 'valor': 'R$ 20.791', 'subtitulo': 'Resultado Final', 'icone': '🎯'},
+            {'titulo': 'FATURAMENTO', 'valor': 'R$ 178.072,00'},
+            {'titulo': 'CUSTOS TOTAIS', 'valor': 'R$ 95.729,00'},
+            {'titulo': 'MARGEM CONTRIB.', 'valor': 'R$ 82.343,00'},
+            {'titulo': 'DESPESAS', 'valor': 'R$ 46.050,00'},
+            {'titulo': 'RESULTADO', 'valor': 'R$ 29.490,00'},
         ]
         elements.append(self._create_kpi_cards(kpis))
         elements.append(Spacer(1, 20))
         
         elements.append(self._create_note_box(
-            "📌 Legenda dos KPIs",
-            "<b>💰 Faturamento Bruto:</b> Soma da Receita Bruta de Produção Direta e Portal MAAS<br/><br/>"
-            "<b>📉 Custos Totais:</b> Soma de Impostos Diretos, Custo Operacional (D.A.) e Rebate AAI, menos Co-corretagem<br/><br/>"
-            "<b>📊 Margem de Contribuição:</b> Faturamento Bruto menos Custos Totais<br/><br/>"
-            "<b>💸 Despesas Totais:</b> Soma de Despesas Operacionais e Folha + Terceiros<br/><br/>"
-            "<b>🎯 Resultado Operacional:</b> Margem de Contribuição menos Despesas Totais"
+            "Legenda dos KPIs",
+            "<b>Faturamento Bruto:</b> Soma da Receita Bruta de Producao Direta e Portal MAAS<br/><br/>"
+            "<b>Custos Totais:</b> Soma de Impostos Diretos, Custo Operacional (D.A.) e Rebate AAI, menos Co-corretagem<br/><br/>"
+            "<b>Margem de Contribuicao:</b> Faturamento Bruto menos Custos Totais<br/><br/>"
+            "<b>Despesas Totais:</b> Soma de Despesas Operacionais e Folha + Terceiros<br/><br/>"
+            "<b>Resultado Operacional:</b> Margem de Contribuicao menos Despesas Totais"
         ))
         elements.append(Spacer(1, 20))
         
-        elements.append(self._create_section_header("📈 EVOLUÇÃO MENSAL - RECEITA vs RESULTADO", HexColor('#1a3a5c')))
+        elements.append(self._create_section_header("EVOLUCAO MENSAL - RECEITA vs RESULTADO", HexColor('#1a3a5c')))
         elements.append(Spacer(1, 15))
         
         meses = ['Jan', 'Fev', 'Mar', 'Abr']
-        receita_bruta = [42263, 49513, 71946, 17075]
+        receita_bruta = [42263, 49513, 71946, 14350]
         
-        elements.append(self._create_line_chart(receita_bruta, meses, '📈 Evolução da Receita Bruta Mensal (R$)', width=500, height=180))
+        elements.append(self._create_line_chart(receita_bruta, meses, 'Evolucao da Receita Bruta Mensal (R$)', width=500, height=180))
         elements.append(Spacer(1, 15))
         
-        evolucao_headers = ['Mês', 'Receita Bruta', 'Var. %', 'Resultado Op.', 'Margem']
+        evolucao_headers = ['Mes', 'Receita Bruta', 'Var. %', 'Resultado Op.', 'Margem']
         evolucao_data = [
             ['Janeiro', 'R$ 42.263,00', '-', 'R$ 5.133,00', '12,1%'],
             ['Fevereiro', 'R$ 49.513,00', '+17,2%', 'R$ 7.667,00', '15,5%'],
-            ['Março', 'R$ 71.946,00', '+45,3%', 'R$ 16.690,00', '23,2%'],
-            ['Abril', 'R$ 17.075,00', '-76,3%', '(R$ 8.699,00)', '-50,9%'],
+            ['Marco', 'R$ 71.946,00', '+45,3%', 'R$ 16.690,00', '23,2%'],
+            ['Abril', 'R$ 14.350,00', '-80,1%', 'R$ 0,00', '0,0%'],
         ]
         elements.append(self._create_data_table(evolucao_headers, evolucao_data, 
                                                  [3*cm, 4*cm, 3*cm, 4*cm, 3*cm],
@@ -1520,7 +1502,7 @@ def main():
     totais, meses_ativos = calcular_dados_filtrados(meses_selecionados, dados_mensais_atual)
     
     # =========================================================================
-    # 💰 SEÇÃO 1: KPIs PRINCIPAIS - AZUL MALDIVAS
+    # 💰 SEÇÃO 1: KPIs PRINCIPAIS - AZUL MALDIVAS (SEM SUBTÍTULO)
     # =========================================================================
     st.markdown("""
     <div class="section-header" style="background: linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%);">
@@ -1540,7 +1522,7 @@ def main():
         st.markdown(criar_cartao_kpi_html(
             "FATURAMENTO", 
             formatar_moeda(faturamento), 
-            "Receita Bruta Total", 
+            "", 
             "#0a1628", 
             "💰"
         ), unsafe_allow_html=True)
@@ -1549,7 +1531,7 @@ def main():
         st.markdown(criar_cartao_kpi_html(
             "CUSTOS TOTAIS", 
             formatar_moeda(custos_totais), 
-            "Impostos + DA + Rebate", 
+            "", 
             "#ff6b6b", 
             "📉"
         ), unsafe_allow_html=True)
@@ -1558,7 +1540,7 @@ def main():
         st.markdown(criar_cartao_kpi_html(
             "MARGEM CONTRIB.", 
             formatar_moeda(margem_contrib), 
-            "Faturamento - Custos", 
+            "", 
             "#2e86ab", 
             "📊"
         ), unsafe_allow_html=True)
@@ -1567,7 +1549,7 @@ def main():
         st.markdown(criar_cartao_kpi_html(
             "DESPESAS TOTAIS", 
             formatar_moeda(despesas_total), 
-            "Operacional + Folha", 
+            "", 
             "#feca57", 
             "💸"
         ), unsafe_allow_html=True)
@@ -1578,7 +1560,7 @@ def main():
         st.markdown(criar_cartao_kpi_html(
             "RESULTADO OPER.", 
             formatar_moeda(resultado_op), 
-            "Resultado Final", 
+            "", 
             cor_resultado, 
             icone_resultado
         ), unsafe_allow_html=True)
@@ -1615,7 +1597,7 @@ def main():
     """, unsafe_allow_html=True)
     
     # =========================================================================
-    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL - GRÁFICOS AZUL MALDIVAS
+    # 📈 SEÇÃO 2: EVOLUÇÃO MENSAL - GRÁFICOS AZUL CLARO
     # =========================================================================
     if show_charts:
         st.markdown("""
@@ -1637,6 +1619,9 @@ def main():
                 cresc = 0
             crescimento.append(round(cresc, 1))
         
+        # Cor azul claro uniforme para todos os gráficos
+        azul_claro = '#7dd3fc'
+        
         fig_evolucao = make_subplots(
             rows=1, cols=3,
             subplot_titles=(
@@ -1648,14 +1633,12 @@ def main():
             column_widths=[0.35, 0.30, 0.35]
         )
         
-        # Gráfico 1: Receita Bruta - Tons de Azul
+        # Gráfico 1: Receita Bruta - Azul Claro
         fig_evolucao.add_trace(
             go.Bar(
                 x=meses, y=receita_bruta,
                 marker=dict(
-                    color=receita_bruta, 
-                    colorscale=[[0, '#4ea8de'], [0.5, '#2e86ab'], [1, '#0a1628']], 
-                    showscale=False, 
+                    color=azul_claro,
                     line=dict(width=3, color='white'),
                     cornerradius=8
                 ),
@@ -1669,15 +1652,13 @@ def main():
             row=1, col=1
         )
         
-        # Gráfico 2: Crescimento Mensal da Receita - Tons de Azul
-        cores_cresc = ['#00d4aa' if c >= 0 else '#ff6b6b' for c in crescimento]
-        cores_cresc[0] = '#6c757d'
+        # Gráfico 2: Crescimento Mensal da Receita - Azul Claro
         fig_evolucao.add_trace(
             go.Scatter(
                 x=meses, y=crescimento,
                 mode='lines+markers+text',
-                line=dict(color='#1a3a5c', width=5, shape='spline'),
-                marker=dict(size=22, color=cores_cresc, line=dict(width=4, color='white'), symbol='circle'),
+                line=dict(color=azul_claro, width=5, shape='spline'),
+                marker=dict(size=22, color=azul_claro, line=dict(width=4, color='white'), symbol='circle'),
                 text=[f"{v:+.1f}%" for v in crescimento],
                 textposition='top center',
                 textfont=dict(size=15, family='Arial Black', color='#0a1628'),
@@ -1689,13 +1670,12 @@ def main():
         
         fig_evolucao.add_hline(y=0, line_dash="dash", line_color="#ff6b6b", line_width=3, row=1, col=2)
         
-        # Gráfico 3: Resultado Operacional
-        cores_resultado = ['#00d4aa' if r >= 0 else '#ff6b6b' for r in resultado_op_mensal]
+        # Gráfico 3: Resultado Operacional - Azul Claro
         fig_evolucao.add_trace(
             go.Bar(
                 x=meses, y=resultado_op_mensal,
                 marker=dict(
-                    color=cores_resultado, 
+                    color=azul_claro,
                     line=dict(width=3, color='white'),
                     cornerradius=8
                 ),
@@ -1890,22 +1870,115 @@ def main():
         partner_total = int(total_resultado * 0.65)
         maldivas_total = int(total_resultado * 0.35)
         
+        # =========================================================================
+        # ✅ TOTAIS YTD - FORMATAÇÃO CORRIGIDA E BONITA
+        # =========================================================================
         if total_resultado >= 0:
-            st.success(f"""
-            ✅ **TOTAIS YTD:** 
-            Resultado = **{formatar_moeda(total_resultado)}** 
-            → Partner (65%): **{formatar_moeda(partner_total)}** 
-            | Maldivas (35%): **{formatar_moeda(maldivas_total)}** 
-            | **STATUS: LUCRO**
-            """)
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+                padding: 25px 35px;
+                border-radius: 16px;
+                margin: 20px 0;
+                box-shadow: 0 10px 30px rgba(0, 212, 170, 0.3);
+            ">
+                <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px;">
+                    <span style="font-size: 2rem;">✅</span>
+                    <div style="color: white; font-size: 1.1rem; font-weight: 600; text-align: center;">
+                        <strong style="font-size: 1.3rem;">TOTAIS YTD</strong><br/>
+                        <span style="font-size: 1.5rem; font-weight: 900;">Resultado: {formatar_moeda(total_resultado)}</span>
+                    </div>
+                </div>
+                <div style="
+                    display: flex; 
+                    justify-content: center; 
+                    gap: 40px; 
+                    margin-top: 20px; 
+                    flex-wrap: wrap;
+                ">
+                    <div style="
+                        background: rgba(255,255,255,0.2); 
+                        padding: 15px 25px; 
+                        border-radius: 12px;
+                        text-align: center;
+                    ">
+                        <div style="color: white; font-size: 0.9rem; opacity: 0.9;">Partner (65%)</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 900;">{formatar_moeda(partner_total)}</div>
+                    </div>
+                    <div style="
+                        background: rgba(255,255,255,0.2); 
+                        padding: 15px 25px; 
+                        border-radius: 12px;
+                        text-align: center;
+                    ">
+                        <div style="color: white; font-size: 0.9rem; opacity: 0.9;">Maldivas (35%)</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 900;">{formatar_moeda(maldivas_total)}</div>
+                    </div>
+                    <div style="
+                        background: rgba(255,255,255,0.3); 
+                        padding: 15px 25px; 
+                        border-radius: 12px;
+                        text-align: center;
+                    ">
+                        <div style="color: white; font-size: 0.9rem; opacity: 0.9;">Status</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 900;">📈 LUCRO</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.error(f"""
-            ⚠️ **TOTAIS YTD:** 
-            Resultado = **{formatar_moeda(total_resultado)}** 
-            → Partner (65%): **{formatar_moeda(partner_total)}** 
-            | Maldivas (35%): **{formatar_moeda(maldivas_total)}** 
-            | **STATUS: PREJUÍZO**
-            """)
+            st.markdown(f"""
+            <div style="
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+                padding: 25px 35px;
+                border-radius: 16px;
+                margin: 20px 0;
+                box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+            ">
+                <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px;">
+                    <span style="font-size: 2rem;">⚠️</span>
+                    <div style="color: white; font-size: 1.1rem; font-weight: 600; text-align: center;">
+                        <strong style="font-size: 1.3rem;">TOTAIS YTD</strong><br/>
+                        <span style="font-size: 1.5rem; font-weight: 900;">Resultado: {formatar_moeda(total_resultado)}</span>
+                    </div>
+                </div>
+                <div style="
+                    display: flex; 
+                    justify-content: center; 
+                    gap: 40px; 
+                    margin-top: 20px; 
+                    flex-wrap: wrap;
+                ">
+                    <div style="
+                        background: rgba(255,255,255,0.2); 
+                        padding: 15px 25px; 
+                        border-radius: 12px;
+                        text-align: center;
+                    ">
+                        <div style="color: white; font-size: 0.9rem; opacity: 0.9;">Partner (65%)</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 900;">{formatar_moeda(partner_total)}</div>
+                    </div>
+                    <div style="
+                        background: rgba(255,255,255,0.2); 
+                        padding: 15px 25px; 
+                        border-radius: 12px;
+                        text-align: center;
+                    ">
+                        <div style="color: white; font-size: 0.9rem; opacity: 0.9;">Maldivas (35%)</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 900;">{formatar_moeda(maldivas_total)}</div>
+                    </div>
+                    <div style="
+                        background: rgba(255,255,255,0.3); 
+                        padding: 15px 25px; 
+                        border-radius: 12px;
+                        text-align: center;
+                    ">
+                        <div style="color: white; font-size: 0.9rem; opacity: 0.9;">Status</div>
+                        <div style="color: white; font-size: 1.4rem; font-weight: 900;">📉 PREJUÍZO</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
     
     # =========================================================================
     # 📦 SEÇÃO 5: ANÁLISE POR PRODUTO
@@ -2214,21 +2287,21 @@ def main():
             ],
             'Valor': [
                 formatar_moeda(totais['receita_bruta']),
-                'R$ 180.522,00',
+                'R$ 177.797,00',
                 'R$ 275,00',
                 '',
-                '(R$ 31.465,00)',
-                '(R$ 15.045,00)',
-                'R$ 839,00',
-                '(R$ 51.192,00)',
+                '(R$ 31.044,00)',
+                '(R$ 14.842,00)',
+                'R$ 803,00',
+                '(R$ 50.646,00)',
                 '',
                 formatar_moeda(totais['custos_totais']),
                 '',
                 formatar_moeda(totais['margem_contrib']),
                 '',
                 formatar_moeda(totais['despesas']),
-                '(R$ 40.350,00)',
-                '(R$ 22.716,00)',
+                '(R$ 29.104,00)',
+                '(R$ 16.946,00)',
                 '',
                 formatar_moeda(totais['resultado_op']),
             ]
