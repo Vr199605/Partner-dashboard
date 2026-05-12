@@ -69,7 +69,7 @@ PALETA_QUALITATIVA = px.colors.qualitative.Set2
 PALETA_DIVERGENTE = px.colors.diverging.RdYlGn
 
 # =============================================================================
-# 📊 DADOS MENSAIS DA DRE
+# 📊 DADOS MENSAIS DA DRE - ATUALIZADOS CONFORME PLANILHA
 # =============================================================================
 
 DADOS_MENSAIS = {
@@ -82,14 +82,14 @@ DADOS_MENSAIS = {
     },
     'Fevereiro': {
         'receita_bruta': 49513,
-        'custos_totais': 26782,
+        'custos_totais': 26781,
         'margem_contrib': 22732,
         'despesas': 15065,
         'resultado_op': 7667
     },
     'Março': {
         'receita_bruta': 71946,
-        'custos_totais': 39509,
+        'custos_totais': 39709,
         'margem_contrib': 32436,
         'despesas': 15746,
         'resultado_op': 16690
@@ -307,7 +307,6 @@ class PDFDashboardCompleto:
         
     def _setup_styles(self):
         """Configura estilos do PDF"""
-        # Título da Capa
         self.styles.add(ParagraphStyle(
             name='CapaTitulo', fontSize=48, textColor=colors.white, alignment=TA_CENTER,
             fontName='Helvetica-Bold', spaceAfter=10, leading=55
@@ -356,12 +355,15 @@ class PDFDashboardCompleto:
         
         canvas_obj.restoreState()
     
-    def _criar_capa(self):
+    def _criar_capa(self, totais):
         """Cria página de capa"""
         elements = []
         elements.append(Spacer(1, 80))
         
-        # Box da capa
+        # Calcular margem
+        margem_pct = (totais['resultado_op'] / totais['receita_bruta'] * 100) if totais['receita_bruta'] > 0 else 0
+        status = "LUCRO" if totais['resultado_op'] >= 0 else "PREJUIZO"
+        
         capa_data = [
             [Paragraph("<br/><br/>", self.styles['CapaTitulo'])],
             [Paragraph("ASSERTIF CORRETORA", self.styles['CapaTitulo'])],
@@ -376,7 +378,7 @@ class PDFDashboardCompleto:
             [Paragraph("Periodo: Janeiro a Abril de 2026", ParagraphStyle(
                 name='Info1', fontSize=14, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica'))],
             [Spacer(1, 10)],
-            [Paragraph("Status: LUCRO | Margem: 17%", ParagraphStyle(
+            [Paragraph(f"Status: {status} | Margem: {margem_pct:.0f}%", ParagraphStyle(
                 name='Info2', fontSize=14, textColor=HexColor('#00d4aa'), alignment=TA_CENTER, fontName='Helvetica-Bold'))],
             [Spacer(1, 50)],
             [Paragraph(f"Documento gerado em: {datetime.now().strftime('%d/%m/%Y as %H:%M')}", ParagraphStyle(
@@ -396,6 +398,38 @@ class PDFDashboardCompleto:
         ]))
         
         elements.append(capa_table)
+        elements.append(Spacer(1, 20))
+        
+        # Resumo na capa
+        partner = int(totais['resultado_op'] * 0.65)
+        maldivas = int(totais['resultado_op'] * 0.35)
+        
+        resumo_capa = [
+            ['Faturamento YTD', formatar_moeda(totais['receita_bruta']), 'Margem Contribuicao', formatar_moeda(totais['margem_contrib'])],
+            ['Despesas Totais', formatar_moeda(totais['despesas']), 'Resultado Operacional', formatar_moeda(totais['resultado_op'])],
+            ['Partner (65%)', formatar_moeda(partner), 'Maldivas (35%)', formatar_moeda(maldivas)],
+        ]
+        
+        resumo_table = Table(resumo_capa, colWidths=[4.5*cm, 4*cm, 4.5*cm, 4*cm])
+        resumo_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), HexColor('#f8f9fa')),
+            ('TEXTCOLOR', (0, 0), (0, -1), HexColor('#0a1628')),
+            ('TEXTCOLOR', (2, 0), (2, -1), HexColor('#0a1628')),
+            ('TEXTCOLOR', (1, 0), (1, -1), HexColor('#00d4aa')),
+            ('TEXTCOLOR', (3, 0), (3, -1), HexColor('#00d4aa')),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTNAME', (1, 0), (1, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (3, 0), (3, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('TOPPADDING', (0, 0), (-1, -1), 12),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+            ('GRID', (0, 0), (-1, -1), 1, HexColor('#e0e0e0')),
+            ('BOX', (0, 0), (-1, -1), 2, HexColor('#0a1628')),
+        ]))
+        elements.append(resumo_table)
+        
         elements.append(PageBreak())
         return elements
     
@@ -404,7 +438,6 @@ class PDFDashboardCompleto:
         elements = []
         elements.append(Spacer(1, 60))
         
-        # Título do sumário
         titulo_sumario = Table([[Paragraph("<b>SUMARIO</b>", ParagraphStyle(
             name='SumTit', fontSize=18, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold'
         ))]], colWidths=[17*cm])
@@ -547,7 +580,6 @@ class PDFDashboardCompleto:
         elements.append(self._criar_secao_titulo("2. EVOLUCAO MENSAL DETALHADA", HexColor('#1a3a5c')))
         elements.append(Spacer(1, 25))
         
-        # Tabela de evolução
         headers = ['Mes', 'Receita Bruta', 'Custos', 'Margem Contrib.', 'Despesas', 'Resultado', 'Margem %']
         data = [headers]
         
@@ -567,7 +599,6 @@ class PDFDashboardCompleto:
             ]
             data.append(row)
         
-        # Linha de totais
         total_receita = sum(d['receita_bruta'] for d in dados_mensais.values())
         total_custos = sum(d['custos_totais'] for d in dados_mensais.values())
         total_margem = sum(d['margem_contrib'] for d in dados_mensais.values())
@@ -612,7 +643,7 @@ class PDFDashboardCompleto:
         elements.append(Spacer(1, 30))
         
         # Análise de variação
-        elements.append(Paragraph("<b>Analise de Variacao Mensal:</b>", ParagraphStyle(
+        elements.append(Paragraph("<b>Analise de Variacao Mensal da Receita:</b>", ParagraphStyle(
             name='VarTit', fontSize=11, textColor=HexColor('#0a1628'), fontName='Helvetica-Bold'
         )))
         elements.append(Spacer(1, 10))
@@ -651,7 +682,7 @@ class PDFDashboardCompleto:
             
             for i, (_, row) in enumerate(df_seg.head(15).iterrows()):
                 data.append([
-                    f"{i+1}o",
+                    f"{i+1}",
                     str(row['Seguradora'])[:30],
                     formatar_moeda(row['Total']),
                     str(int(row['Qtd'])),
@@ -675,19 +706,18 @@ class PDFDashboardCompleto:
             ]))
             elements.append(table)
         else:
-            elements.append(Paragraph("Dados de seguradoras nao disponiveis.", self.styles['TextoNormal']))
+            elements.append(Paragraph("Dados de seguradoras nao disponiveis. Carregue o arquivo Excel com a aba 'ASSERTIF DIRETO'.", self.styles['TextoNormal']))
         
         elements.append(PageBreak())
         return elements
     
-    def _criar_distribuicao_socios(self, dados_mensais):
+    def _criar_distribuicao_socios(self, dados_mensais, totais):
         """Cria seção de distribuição entre sócios"""
         elements = []
         elements.append(Spacer(1, 60))
         elements.append(self._criar_secao_titulo("4. DISTRIBUICAO DE RESULTADOS - SOCIOS", HexColor('#4ea8de')))
         elements.append(Spacer(1, 25))
         
-        # Tabela de distribuição mensal
         headers = ['Mes', 'Resultado', 'Partner (65%)', 'Maldivas (35%)']
         data = [headers]
         
@@ -722,7 +752,6 @@ class PDFDashboardCompleto:
         elements.append(table)
         elements.append(Spacer(1, 30))
         
-        # Resumo final
         status = "LUCRO" if total_resultado >= 0 else "PREJUIZO"
         cor_status = HexColor('#00d4aa') if total_resultado >= 0 else HexColor('#ff6b6b')
         
@@ -768,11 +797,9 @@ class PDFDashboardCompleto:
             headers = ['Pos.', 'Originador', 'Total Comissao', 'Operacoes', 'Ticket Medio', '% Total']
             data = [headers]
             
-            medalhas = ['1o', '2o', '3o']
             for i, (_, row) in enumerate(df_orig.head(10).iterrows()):
-                pos = medalhas[i] if i < 3 else f"{i+1}o"
                 data.append([
-                    pos,
+                    f"{i+1}",
                     str(row['Originador'])[:25],
                     formatar_moeda(row['Total']),
                     str(int(row['Operações'])),
@@ -799,7 +826,7 @@ class PDFDashboardCompleto:
             ]))
             elements.append(table)
         else:
-            elements.append(Paragraph("Dados de originadores nao disponiveis.", self.styles['TextoNormal']))
+            elements.append(Paragraph("Dados de originadores nao disponiveis. Carregue o arquivo Excel.", self.styles['TextoNormal']))
         
         elements.append(PageBreak())
         return elements
@@ -817,7 +844,7 @@ class PDFDashboardCompleto:
             
             for i, (_, row) in enumerate(df_cli.head(15).iterrows()):
                 data.append([
-                    f"{i+1}o",
+                    f"{i+1}",
                     str(row['Cliente'])[:35],
                     formatar_moeda(row['Total']),
                     str(int(row['Qtd'])),
@@ -859,7 +886,7 @@ class PDFDashboardCompleto:
             
             for i, (_, row) in enumerate(df_prod.iterrows()):
                 data.append([
-                    f"{i+1}o",
+                    f"{i+1}",
                     str(row['Produto'])[:30],
                     formatar_moeda(row['Total']),
                     str(int(row['Qtd'])),
@@ -900,7 +927,7 @@ class PDFDashboardCompleto:
             
             for i, (_, row) in enumerate(df_cat.head(10).iterrows()):
                 data.append([
-                    f"{i+1}o",
+                    f"{i+1}",
                     str(row['Categoria'])[:35],
                     formatar_moeda(row['Total']),
                     str(int(row['Qtd'])),
@@ -928,37 +955,44 @@ class PDFDashboardCompleto:
         elements.append(PageBreak())
         return elements
     
-    def _criar_dre_completo(self, totais):
+    def _criar_dre_completo(self, totais, dados_mensais):
         """Cria DRE completo"""
         elements = []
         elements.append(Spacer(1, 60))
         elements.append(self._criar_secao_titulo("9. DRE COMPLETO - DEMONSTRATIVO DE RESULTADOS", HexColor('#0a1628')))
         elements.append(Spacer(1, 25))
         
+        # Calcular totais
+        total_receita = sum(d['receita_bruta'] for d in dados_mensais.values())
+        total_custos = sum(d['custos_totais'] for d in dados_mensais.values())
+        total_margem = sum(d['margem_contrib'] for d in dados_mensais.values())
+        total_despesas = sum(d['despesas'] for d in dados_mensais.values())
+        total_resultado = sum(d['resultado_op'] for d in dados_mensais.values())
+        
         dre_data = [
             ['DEMONSTRATIVO DE RESULTADOS DO EXERCICIO', 'VALOR YTD'],
             ['', ''],
-            ['RECEITA BRUTA TOTAL', formatar_moeda(totais['receita_bruta'])],
+            ['RECEITA BRUTA TOTAL (Prod. Direta + MAAS)', formatar_moeda(total_receita)],
             ['    Producao Direta', 'R$ 177.797,00'],
             ['    Portal MAAS', 'R$ 275,00'],
             ['', ''],
             ['(-) DEDUCOES DA RECEITA', ''],
-            ['    Impostos Diretos', '(R$ 31.044,00)'],
-            ['    Custo Operacional (D.A.)', '(R$ 14.842,00)'],
+            ['    Impostos Diretos', '(R$ 30.990,00)'],
+            ['    Custo Operacional (D.A.)', '(R$ 14.820,00)'],
             ['    (+) Co-corretagem', 'R$ 803,00'],
             ['    Rebate AAI', '(R$ 50.646,00)'],
             ['', ''],
-            ['(=) CUSTOS TOTAIS', formatar_moeda(totais['custos_totais'])],
+            ['(=) CUSTOS TOTAIS', formatar_moeda(total_custos)],
             ['', ''],
-            ['(=) MARGEM DE CONTRIBUICAO', formatar_moeda(totais['margem_contrib'])],
+            ['(=) MARGEM DE CONTRIBUICAO', formatar_moeda(total_margem)],
             ['', ''],
             ['(-) DESPESAS OPERACIONAIS', ''],
             ['    Despesas', '(R$ 29.104,00)'],
             ['    Folha + Terceiros', '(R$ 16.946,00)'],
             ['', ''],
-            ['(=) DESPESAS TOTAIS', formatar_moeda(totais['despesas'])],
+            ['(=) DESPESAS TOTAIS', formatar_moeda(total_despesas)],
             ['', ''],
-            ['(=) RESULTADO OPERACIONAL', formatar_moeda(totais['resultado_op'])],
+            ['(=) RESULTADO OPERACIONAL', formatar_moeda(total_resultado)],
         ]
         
         col_widths = [11*cm, 6*cm]
@@ -978,7 +1012,6 @@ class PDFDashboardCompleto:
             ('BOX', (0, 0), (-1, -1), 1.5, HexColor('#0a1628')),
         ]
         
-        # Destacar linhas importantes
         linhas_destaque = [2, 12, 14, 20, 22]
         for linha in linhas_destaque:
             if linha < len(dre_data):
@@ -998,7 +1031,6 @@ class PDFDashboardCompleto:
         elements.append(self._criar_secao_titulo("10. RESUMO EXECUTIVO FINAL", HexColor('#0a1628')))
         elements.append(Spacer(1, 25))
         
-        # Calculos
         total_resultado = sum(d['resultado_op'] for d in dados_mensais.values())
         total_receita = sum(d['receita_bruta'] for d in dados_mensais.values())
         margem = (total_resultado / total_receita * 100) if total_receita > 0 else 0
@@ -1006,7 +1038,6 @@ class PDFDashboardCompleto:
         maldivas = int(total_resultado * 0.35)
         status = "LUCRO" if total_resultado >= 0 else "PREJUIZO"
         
-        # Box de resumo
         resumo_items = [
             ('Periodo Analisado:', 'Janeiro a Abril de 2026'),
             ('Faturamento Total:', formatar_moeda(total_receita)),
@@ -1018,9 +1049,10 @@ class PDFDashboardCompleto:
         ]
         
         for titulo, valor in resumo_items:
+            cor_valor = HexColor('#00d4aa') if 'LUCRO' in valor or valor.startswith('R$') else HexColor('#333333')
             item_data = [[
                 Paragraph(f"<b>{titulo}</b>", ParagraphStyle(name='ResFinal1', fontSize=11, textColor=HexColor('#0a1628'))),
-                Paragraph(f"<b>{valor}</b>", ParagraphStyle(name='ResFinal2', fontSize=11, textColor=HexColor('#00d4aa'), alignment=TA_RIGHT)),
+                Paragraph(f"<b>{valor}</b>", ParagraphStyle(name='ResFinal2', fontSize=11, textColor=cor_valor, alignment=TA_RIGHT)),
             ]]
             item_table = Table(item_data, colWidths=[10*cm, 7*cm])
             item_table.setStyle(TableStyle([
@@ -1033,7 +1065,6 @@ class PDFDashboardCompleto:
         
         elements.append(Spacer(1, 40))
         
-        # Rodapé final
         footer_data = [
             [Paragraph("<b>ASSERTIF CORRETORA DE SEGUROS</b>", ParagraphStyle(
                 name='FootFinal1', fontSize=14, textColor=colors.white, alignment=TA_CENTER, fontName='Helvetica-Bold'
@@ -1077,18 +1108,17 @@ class PDFDashboardCompleto:
         
         elements = []
         
-        # Todas as seções
-        elements.extend(self._criar_capa())
+        elements.extend(self._criar_capa(totais))
         elements.extend(self._criar_sumario())
         elements.extend(self._criar_kpis(totais))
         elements.extend(self._criar_evolucao_mensal(dados_mensais))
         elements.extend(self._criar_ranking_seguradoras(df_seg))
-        elements.extend(self._criar_distribuicao_socios(dados_mensais))
+        elements.extend(self._criar_distribuicao_socios(dados_mensais, totais))
         elements.extend(self._criar_ranking_originadores(df_orig))
         elements.extend(self._criar_ranking_clientes(df_cli))
         elements.extend(self._criar_analise_produtos(df_prod))
         elements.extend(self._criar_ranking_despesas(df_cat))
-        elements.extend(self._criar_dre_completo(totais))
+        elements.extend(self._criar_dre_completo(totais, dados_mensais))
         elements.extend(self._criar_resumo_final(totais, dados_mensais))
         
         doc.build(elements, onFirstPage=self._criar_cabecalho_rodape, onLaterPages=self._criar_cabecalho_rodape)
